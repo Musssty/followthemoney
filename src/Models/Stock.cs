@@ -1,4 +1,4 @@
-namespace FollowTheMoney;
+namespace FollowTheMoney.Models;
 
 public class Stock
 {
