@@ -1,7 +1,37 @@
 ﻿@page "/"
+@using FollowTheMoney.Models
+@rendermode InteractiveServer
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+<h1>Welcome</h1>
 
-Welcome to your new app.
+<SearchBar OnSearchCompleted="@HandleSearchResults" />
+
+@if (searchResults != null && searchResults.Any())
+{
+    <div class="results mt-3">
+        <h3>Search Results (@searchResults.Count):</h3>
+        <div class="list-group">
+            @foreach (var politician in searchResults)
+            {
+                <div class="list-group-item">
+                    <h5>@politician.FullName</h5>
+                    <p class="mb-1"><strong>Position:</strong> @politician.Position</p>
+                    <p class="mb-1"><strong>Electoral Division:</strong> @politician.ElectoralDivision, @politician.State</p>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    private List<Politician>? searchResults;
+
+    private Task HandleSearchResults(List<Politician> results)
+    {
+        searchResults = results;
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+}
