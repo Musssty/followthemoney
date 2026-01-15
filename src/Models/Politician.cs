@@ -6,18 +6,25 @@ public class Politician {
     public string LastName  { get; set; }
     public string ElectoralDivision  { get; set; }
     public string State { get; set; }
+    public date DOB { get; set; }
+    public date TermStartDate { get; set; }
+    public date TermEndDate { get; set; }
+    public string Position { get; set; }
+    public string CreatedDate { get; set; }
+    public string UpdatedDate { get; set; }
 
-    // Foreign Keys
-    public int OrganisationId { get; set; }
-    public int StockHoldingId { get; set; }
-    public int AssetId { get; set; }
+    // Foreign Keys - these imply only one
     public int PoliticalPartyId { get; set; }
 
-    // Navigation properties - ? this means it could be null setting it to this as idk yet need to think it through
-    public Organisation? Organisation { get; set; }
-    public StockHolding? StockHolding { get; set; }
-    public Asset? Asset { get; set; }
+    // Navigation property for single relationships
     public PoliticalParty? PoliticalParty { get; set; }
 
+    // Navigation properties for multiple relationships
+    // navigation properties allow the querying of information much easier and other benefits that i dont understand
+    public List<Organisation> Organisations { get; set; } = new();
+    public List<StockHolding> StockHoldings { get; set; } = new();
+    public List<Asset> Assets { get; set; } = new();
+
+    // just for convenience
     public string FullName => $"{FirstName} {LastName}";
 }
