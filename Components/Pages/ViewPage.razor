@@ -10,6 +10,10 @@
         <div class="card">
             <div class="card-header">
                 <h2>@politician.FullName</h2>
+                @if (politician.PoliticalParty != null)
+                {
+                    <span class="badge bg-primary">@politician.PoliticalParty.Abbreviation</span>
+                }
             </div>
             <div class="card-body">
                 <div class="row">
@@ -24,7 +28,11 @@
                         <p><strong>Position:</strong> @politician.Position</p>
                         <p><strong>Electoral Division:</strong> @politician.ElectoralDivision</p>
                         <p><strong>State:</strong> @politician.State</p>
-                        <p><strong>Political Party ID:</strong> @politician.PoliticalPartyId</p>
+                        @if (politician.PoliticalParty != null)
+                        {
+                            <p><strong>Political Party:</strong> @politician.PoliticalParty.Name (@politician.PoliticalParty.Abbreviation)</p>
+                            <p><strong>Party Founded:</strong> @politician.PoliticalParty.Founded.ToString("dd MMMM yyyy")</p>
+                        }
                     </div>
                 </div>
                 
@@ -73,8 +81,6 @@ else
 
     protected override void OnInitialized()
     {
-        // For now, use the same dummy data
-        // Later you'll replace this with a database call
         politician = GetDummyPoliticians().FirstOrDefault(p => p.Id == Id);
     }
     
@@ -95,7 +101,16 @@ else
                 Position = "Prime Minister",
                 CreatedDate = DateTime.Now.ToString(),
                 UpdatedDate = DateTime.Now.ToString(),
-                PoliticalPartyId = 1
+                PoliticalPartyId = 1,
+                PoliticalParty = new PoliticalParty 
+                { 
+                    Id = 1,
+                    Name = "Australian Labor Party",
+                    Abbreviation = "ALP",
+                    Founded = new DateTime(1901, 1, 1),
+                    CreatedDate = DateTime.Now.ToString(),
+                    UpdatedDate = DateTime.Now.ToString()
+                }
             },
             new Politician
             {
@@ -110,7 +125,16 @@ else
                 Position = "Opposition Leader",
                 CreatedDate = DateTime.Now.ToString(),
                 UpdatedDate = DateTime.Now.ToString(),
-                PoliticalPartyId = 2
+                PoliticalPartyId = 2,
+                PoliticalParty = new PoliticalParty 
+                { 
+                    Id = 2,
+                    Name = "Liberal Party of Australia",
+                    Abbreviation = "LIB",
+                    Founded = new DateTime(1944, 8, 31),
+                    CreatedDate = DateTime.Now.ToString(),
+                    UpdatedDate = DateTime.Now.ToString()
+                }
             },
             new Politician
             {
@@ -125,7 +149,16 @@ else
                 Position = "Minister for Foreign Affairs",
                 CreatedDate = DateTime.Now.ToString(),
                 UpdatedDate = DateTime.Now.ToString(),
-                PoliticalPartyId = 1
+                PoliticalPartyId = 1,
+                PoliticalParty = new PoliticalParty 
+                { 
+                    Id = 1,
+                    Name = "Australian Labor Party",
+                    Abbreviation = "ALP",
+                    Founded = new DateTime(1901, 1, 1),
+                    CreatedDate = DateTime.Now.ToString(),
+                    UpdatedDate = DateTime.Now.ToString()
+                }
             },
             new Politician
             {
@@ -140,7 +173,16 @@ else
                 Position = "Greens Leader",
                 CreatedDate = DateTime.Now.ToString(),
                 UpdatedDate = DateTime.Now.ToString(),
-                PoliticalPartyId = 3
+                PoliticalPartyId = 3,
+                PoliticalParty = new PoliticalParty 
+                { 
+                    Id = 3,
+                    Name = "Australian Greens",
+                    Abbreviation = "GRN",
+                    Founded = new DateTime(1992, 8, 1),
+                    CreatedDate = DateTime.Now.ToString(),
+                    UpdatedDate = DateTime.Now.ToString()
+                }
             },
             new Politician
             {
@@ -155,7 +197,16 @@ else
                 Position = "Treasurer",
                 CreatedDate = DateTime.Now.ToString(),
                 UpdatedDate = DateTime.Now.ToString(),
-                PoliticalPartyId = 1
+                PoliticalPartyId = 1,
+                PoliticalParty = new PoliticalParty 
+                { 
+                    Id = 1,
+                    Name = "Australian Labor Party",
+                    Abbreviation = "ALP",
+                    Founded = new DateTime(1901, 1, 1),
+                    CreatedDate = DateTime.Now.ToString(),
+                    UpdatedDate = DateTime.Now.ToString()
+                }
             },
             new Politician
             {
@@ -170,7 +221,16 @@ else
                 Position = "Minister for the Environment and Water",
                 CreatedDate = DateTime.Now.ToString(),
                 UpdatedDate = DateTime.Now.ToString(),
-                PoliticalPartyId = 1
+                PoliticalPartyId = 1,
+                PoliticalParty = new PoliticalParty 
+                { 
+                    Id = 1,
+                    Name = "Australian Labor Party",
+                    Abbreviation = "ALP",
+                    Founded = new DateTime(1901, 1, 1),
+                    CreatedDate = DateTime.Now.ToString(),
+                    UpdatedDate = DateTime.Now.ToString()
+                }
             },
             new Politician
             {
@@ -185,7 +245,16 @@ else
                 Position = "Deputy Opposition Leader",
                 CreatedDate = DateTime.Now.ToString(),
                 UpdatedDate = DateTime.Now.ToString(),
-                PoliticalPartyId = 2
+                PoliticalPartyId = 2,
+                PoliticalParty = new PoliticalParty 
+                { 
+                    Id = 2,
+                    Name = "Liberal Party of Australia",
+                    Abbreviation = "LIB",
+                    Founded = new DateTime(1944, 8, 31),
+                    CreatedDate = DateTime.Now.ToString(),
+                    UpdatedDate = DateTime.Now.ToString()
+                }
             },
             new Politician
             {
@@ -200,7 +269,16 @@ else
                 Position = "Deputy Prime Minister",
                 CreatedDate = DateTime.Now.ToString(),
                 UpdatedDate = DateTime.Now.ToString(),
-                PoliticalPartyId = 1
+                PoliticalPartyId = 1,
+                PoliticalParty = new PoliticalParty 
+                { 
+                    Id = 1,
+                    Name = "Australian Labor Party",
+                    Abbreviation = "ALP",
+                    Founded = new DateTime(1901, 1, 1),
+                    CreatedDate = DateTime.Now.ToString(),
+                    UpdatedDate = DateTime.Now.ToString()
+                }
             }
         };
     }

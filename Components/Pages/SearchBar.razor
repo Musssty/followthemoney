@@ -1,13 +1,49 @@
 @using FollowTheMoney.Models
-@using Microsoft.AspNetCore.Components.Web
 
-<div class="search-container">
-    <input type="text" @bind="searchText" @bind:event="oninput" @onkeyup="HandleKeyUp" />
-    <button @onclick="PerformSearch">Search</button>
+<div class="search-container mb-3">
+    <div class="row g-3">
+        <div class="col-md-6">
+            <input type="text" 
+                   class="form-control" 
+                   @bind="searchText" 
+                   @bind:event="oninput"
+                   @onkeyup="HandleKeyUp" 
+                   placeholder="Search politicians..." />
+        </div>
+        <div class="col-md-3">
+    <select class="form-select" @bind="selectedParty" @bind:after="PerformSearch">
+        <option value="">All Parties</option>
+        <option value="ALP">Labor (ALP)</option>
+        <option value="LIB">Liberal (LIB)</option>
+        <option value="GRN">Greens (GRN)</option>
+    </select>
+</div>
+<div class="col-md-3">
+    <select class="form-select" @bind="selectedState" @bind:after="PerformSearch">
+        <option value="">All States</option>
+        <option value="NSW">NSW</option>
+        <option value="VIC">VIC</option>
+        <option value="QLD">QLD</option>
+        <option value="SA">SA</option>
+        <option value="WA">WA</option>
+        <option value="TAS">TAS</option>
+        <option value="ACT">ACT</option>
+        <option value="NT">NT</option>
+    </select>
+</div>
+    </div>
+    <div class="row mt-2">
+        <div class="col">
+            <button class="btn btn-primary" @onclick="PerformSearch">Search</button>
+            <button class="btn btn-secondary ms-2" @onclick="ClearFilters">Clear Filters</button>
+        </div>
+    </div>
 </div>
 
 @code {
     private string searchText = "";
+    private string selectedParty = "";
+    private string selectedState = "";
     private List<Politician> allPoliticians = new();
     
     [Parameter]
@@ -16,37 +52,68 @@
     protected override void OnInitialized()
     {
         allPoliticians = GetDummyPoliticians();
+        Console.WriteLine($"Loaded {allPoliticians.Count} politicians");
     }
 
     private async Task PerformSearch()
     {
-        var results = await SearchPoliticians(searchText);
+        Console.WriteLine($"PerformSearch called with: '{searchText}', Party: '{selectedParty}', State: '{selectedState}'");
+        var results = await SearchPoliticians(searchText, selectedParty, selectedState);
+        Console.WriteLine($"Found {results.Count} results");
+        
         await OnSearchCompleted.InvokeAsync(results);
+        Console.WriteLine("Invoked callback");
+    }
+    
+    private async Task ClearFilters()
+    {
+        searchText = "";
+        selectedParty = "";
+        selectedState = "";
+        await PerformSearch();
     }
     
     private async Task HandleKeyUp(KeyboardEventArgs e)
     {
+        Console.WriteLine($"Key pressed: {e.Key}");
         if (e.Key == "Enter")
         {
             await PerformSearch();
         }
     }
     
-    private async Task<List<Politician>> SearchPoliticians(string query)
+    private async Task<List<Politician>> SearchPoliticians(string query, string party, string state)
     {
-        await Task.Delay(100); // Simulate async operation
+        await Task.Delay(100);
         
-        if (string.IsNullOrWhiteSpace(query))
-            return allPoliticians;
+        var results = allPoliticians.AsEnumerable();
         
-        return allPoliticians
-            .Where(p => 
+        // Filter by search text
+        if (!string.IsNullOrWhiteSpace(query))
+        {
+            results = results.Where(p => 
                 p.FirstName.Contains(query, StringComparison.OrdinalIgnoreCase) ||
                 p.LastName.Contains(query, StringComparison.OrdinalIgnoreCase) ||
                 p.ElectoralDivision.Contains(query, StringComparison.OrdinalIgnoreCase) ||
                 p.State.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-                p.Position.Contains(query, StringComparison.OrdinalIgnoreCase))
-            .ToList();
+                p.Position.Contains(query, StringComparison.OrdinalIgnoreCase));
+        }
+        
+        // Filter by party
+        if (!string.IsNullOrWhiteSpace(party))
+        {
+            results = results.Where(p => p.PoliticalParty?.Abbreviation == party);
+        }
+        
+        // Filter by state
+        if (!string.IsNullOrWhiteSpace(state))
+        {
+            results = results.Where(p => p.State == state);
+        }
+        
+        var finalResults = results.ToList();
+        Console.WriteLine($"Filtered to {finalResults.Count} results");
+        return finalResults;
     }
     
     private List<Politician> GetDummyPoliticians()
@@ -66,7 +133,16 @@
                 Position = "Prime Minister",
                 CreatedDate = DateTime.Now.ToString(),
                 UpdatedDate = DateTime.Now.ToString(),
-                PoliticalPartyId = 1
+                PoliticalPartyId = 1,
+                PoliticalParty = new PoliticalParty 
+                { 
+                    Id = 1,
+                    Name = "Australian Labor Party",
+                    Abbreviation = "ALP",
+                    Founded = new DateTime(1901, 1, 1),
+                    CreatedDate = DateTime.Now.ToString(),
+                    UpdatedDate = DateTime.Now.ToString()
+                }
             },
             new Politician
             {
@@ -81,7 +157,16 @@
                 Position = "Opposition Leader",
                 CreatedDate = DateTime.Now.ToString(),
                 UpdatedDate = DateTime.Now.ToString(),
-                PoliticalPartyId = 2
+                PoliticalPartyId = 2,
+                PoliticalParty = new PoliticalParty 
+                { 
+                    Id = 2,
+                    Name = "Liberal Party of Australia",
+                    Abbreviation = "LIB",
+                    Founded = new DateTime(1944, 8, 31),
+                    CreatedDate = DateTime.Now.ToString(),
+                    UpdatedDate = DateTime.Now.ToString()
+                }
             },
             new Politician
             {
@@ -96,7 +181,16 @@
                 Position = "Minister for Foreign Affairs",
                 CreatedDate = DateTime.Now.ToString(),
                 UpdatedDate = DateTime.Now.ToString(),
-                PoliticalPartyId = 1
+                PoliticalPartyId = 1,
+                PoliticalParty = new PoliticalParty 
+                { 
+                    Id = 1,
+                    Name = "Australian Labor Party",
+                    Abbreviation = "ALP",
+                    Founded = new DateTime(1901, 1, 1),
+                    CreatedDate = DateTime.Now.ToString(),
+                    UpdatedDate = DateTime.Now.ToString()
+                }
             },
             new Politician
             {
@@ -111,7 +205,16 @@
                 Position = "Greens Leader",
                 CreatedDate = DateTime.Now.ToString(),
                 UpdatedDate = DateTime.Now.ToString(),
-                PoliticalPartyId = 3
+                PoliticalPartyId = 3,
+                PoliticalParty = new PoliticalParty 
+                { 
+                    Id = 3,
+                    Name = "Australian Greens",
+                    Abbreviation = "GRN",
+                    Founded = new DateTime(1992, 8, 1),
+                    CreatedDate = DateTime.Now.ToString(),
+                    UpdatedDate = DateTime.Now.ToString()
+                }
             },
             new Politician
             {
@@ -126,7 +229,16 @@
                 Position = "Treasurer",
                 CreatedDate = DateTime.Now.ToString(),
                 UpdatedDate = DateTime.Now.ToString(),
-                PoliticalPartyId = 1
+                PoliticalPartyId = 1,
+                PoliticalParty = new PoliticalParty 
+                { 
+                    Id = 1,
+                    Name = "Australian Labor Party",
+                    Abbreviation = "ALP",
+                    Founded = new DateTime(1901, 1, 1),
+                    CreatedDate = DateTime.Now.ToString(),
+                    UpdatedDate = DateTime.Now.ToString()
+                }
             },
             new Politician
             {
@@ -141,7 +253,16 @@
                 Position = "Minister for the Environment and Water",
                 CreatedDate = DateTime.Now.ToString(),
                 UpdatedDate = DateTime.Now.ToString(),
-                PoliticalPartyId = 1
+                PoliticalPartyId = 1,
+                PoliticalParty = new PoliticalParty 
+                { 
+                    Id = 1,
+                    Name = "Australian Labor Party",
+                    Abbreviation = "ALP",
+                    Founded = new DateTime(1901, 1, 1),
+                    CreatedDate = DateTime.Now.ToString(),
+                    UpdatedDate = DateTime.Now.ToString()
+                }
             },
             new Politician
             {
@@ -156,7 +277,16 @@
                 Position = "Deputy Opposition Leader",
                 CreatedDate = DateTime.Now.ToString(),
                 UpdatedDate = DateTime.Now.ToString(),
-                PoliticalPartyId = 2
+                PoliticalPartyId = 2,
+                PoliticalParty = new PoliticalParty 
+                { 
+                    Id = 2,
+                    Name = "Liberal Party of Australia",
+                    Abbreviation = "LIB",
+                    Founded = new DateTime(1944, 8, 31),
+                    CreatedDate = DateTime.Now.ToString(),
+                    UpdatedDate = DateTime.Now.ToString()
+                }
             },
             new Politician
             {
@@ -171,7 +301,16 @@
                 Position = "Deputy Prime Minister",
                 CreatedDate = DateTime.Now.ToString(),
                 UpdatedDate = DateTime.Now.ToString(),
-                PoliticalPartyId = 1
+                PoliticalPartyId = 1,
+                PoliticalParty = new PoliticalParty 
+                { 
+                    Id = 1,
+                    Name = "Australian Labor Party",
+                    Abbreviation = "ALP",
+                    Founded = new DateTime(1901, 1, 1),
+                    CreatedDate = DateTime.Now.ToString(),
+                    UpdatedDate = DateTime.Now.ToString()
+                }
             }
         };
     }
