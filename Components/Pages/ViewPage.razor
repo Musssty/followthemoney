@@ -1,0 +1,207 @@
+@page "/politician/{Id:int}"
+@using FollowTheMoney.Models
+@rendermode InteractiveServer
+
+<PageTitle>@politician?.FullName</PageTitle>
+
+@if (politician != null)
+{
+    <div class="container mt-4">
+        <div class="card">
+            <div class="card-header">
+                <h2>@politician.FullName</h2>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>Personal Information</h5>
+                        <p><strong>First Name:</strong> @politician.FirstName</p>
+                        <p><strong>Last Name:</strong> @politician.LastName</p>
+                        <p><strong>Date of Birth:</strong> @politician.Dob.ToString("dd MMMM yyyy")</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Political Information</h5>
+                        <p><strong>Position:</strong> @politician.Position</p>
+                        <p><strong>Electoral Division:</strong> @politician.ElectoralDivision</p>
+                        <p><strong>State:</strong> @politician.State</p>
+                        <p><strong>Political Party ID:</strong> @politician.PoliticalPartyId</p>
+                    </div>
+                </div>
+                
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <h5>Term Information</h5>
+                        <p><strong>Term Start:</strong> @politician.TermStartDate.ToString("dd MMMM yyyy")</p>
+                        <p><strong>Term End:</strong> @(politician.TermEndDate?.ToString("dd MMMM yyyy") ?? "Current")</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Record Information</h5>
+                        <p><strong>Created:</strong> @politician.CreatedDate</p>
+                        <p><strong>Updated:</strong> @politician.UpdatedDate</p>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <h5>Related Information</h5>
+                    <p><strong>Organisations:</strong> @politician.Organisations.Count</p>
+                    <p><strong>Stocks:</strong> @politician.Stocks.Count</p>
+                    <p><strong>Assets:</strong> @politician.Assets.Count</p>
+                    <p><strong>Donations:</strong> @politician.Donations.Count</p>
+                </div>
+            </div>
+        </div>
+        
+        <a href="/" class="btn btn-secondary mt-3">Back to Home</a>
+    </div>
+}
+else
+{
+    <div class="container mt-4">
+        <div class="alert alert-warning">
+            <h4>Politician Not Found</h4>
+            <p>The politician with ID @Id could not be found.</p>
+            <a href="/" class="btn btn-primary">Return to Home</a>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    
+    private Politician? politician;
+
+    protected override void OnInitialized()
+    {
+        // For now, use the same dummy data
+        // Later you'll replace this with a database call
+        politician = GetDummyPoliticians().FirstOrDefault(p => p.Id == Id);
+    }
+    
+    private List<Politician> GetDummyPoliticians()
+    {
+        return new List<Politician>
+        {
+            new Politician
+            {
+                Id = 1,
+                FirstName = "Anthony",
+                LastName = "Albanese",
+                ElectoralDivision = "Grayndler",
+                State = "NSW",
+                Dob = new DateTime(1963, 3, 2),
+                TermStartDate = new DateTime(2022, 5, 23),
+                TermEndDate = null,
+                Position = "Prime Minister",
+                CreatedDate = DateTime.Now.ToString(),
+                UpdatedDate = DateTime.Now.ToString(),
+                PoliticalPartyId = 1
+            },
+            new Politician
+            {
+                Id = 2,
+                FirstName = "Peter",
+                LastName = "Dutton",
+                ElectoralDivision = "Dickson",
+                State = "QLD",
+                Dob = new DateTime(1970, 11, 18),
+                TermStartDate = new DateTime(2001, 11, 10),
+                TermEndDate = null,
+                Position = "Opposition Leader",
+                CreatedDate = DateTime.Now.ToString(),
+                UpdatedDate = DateTime.Now.ToString(),
+                PoliticalPartyId = 2
+            },
+            new Politician
+            {
+                Id = 3,
+                FirstName = "Penny",
+                LastName = "Wong",
+                ElectoralDivision = "South Australia",
+                State = "SA",
+                Dob = new DateTime(1968, 11, 5),
+                TermStartDate = new DateTime(2002, 7, 1),
+                TermEndDate = null,
+                Position = "Minister for Foreign Affairs",
+                CreatedDate = DateTime.Now.ToString(),
+                UpdatedDate = DateTime.Now.ToString(),
+                PoliticalPartyId = 1
+            },
+            new Politician
+            {
+                Id = 4,
+                FirstName = "Adam",
+                LastName = "Bandt",
+                ElectoralDivision = "Melbourne",
+                State = "VIC",
+                Dob = new DateTime(1972, 3, 11),
+                TermStartDate = new DateTime(2010, 8, 21),
+                TermEndDate = null,
+                Position = "Greens Leader",
+                CreatedDate = DateTime.Now.ToString(),
+                UpdatedDate = DateTime.Now.ToString(),
+                PoliticalPartyId = 3
+            },
+            new Politician
+            {
+                Id = 5,
+                FirstName = "Jim",
+                LastName = "Chalmers",
+                ElectoralDivision = "Rankin",
+                State = "QLD",
+                Dob = new DateTime(1978, 3, 2),
+                TermStartDate = new DateTime(2013, 9, 7),
+                TermEndDate = null,
+                Position = "Treasurer",
+                CreatedDate = DateTime.Now.ToString(),
+                UpdatedDate = DateTime.Now.ToString(),
+                PoliticalPartyId = 1
+            },
+            new Politician
+            {
+                Id = 6,
+                FirstName = "Tanya",
+                LastName = "Plibersek",
+                ElectoralDivision = "Sydney",
+                State = "NSW",
+                Dob = new DateTime(1969, 12, 2),
+                TermStartDate = new DateTime(1998, 10, 3),
+                TermEndDate = null,
+                Position = "Minister for the Environment and Water",
+                CreatedDate = DateTime.Now.ToString(),
+                UpdatedDate = DateTime.Now.ToString(),
+                PoliticalPartyId = 1
+            },
+            new Politician
+            {
+                Id = 7,
+                FirstName = "Sussan",
+                LastName = "Ley",
+                ElectoralDivision = "Farrer",
+                State = "NSW",
+                Dob = new DateTime(1961, 12, 14),
+                TermStartDate = new DateTime(2001, 11, 10),
+                TermEndDate = null,
+                Position = "Deputy Opposition Leader",
+                CreatedDate = DateTime.Now.ToString(),
+                UpdatedDate = DateTime.Now.ToString(),
+                PoliticalPartyId = 2
+            },
+            new Politician
+            {
+                Id = 8,
+                FirstName = "Richard",
+                LastName = "Marles",
+                ElectoralDivision = "Corio",
+                State = "VIC",
+                Dob = new DateTime(1967, 7, 13),
+                TermStartDate = new DateTime(2007, 11, 24),
+                TermEndDate = null,
+                Position = "Deputy Prime Minister",
+                CreatedDate = DateTime.Now.ToString(),
+                UpdatedDate = DateTime.Now.ToString(),
+                PoliticalPartyId = 1
+            }
+        };
+    }
+}
