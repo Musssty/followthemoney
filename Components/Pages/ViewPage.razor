@@ -1,119 +1,87 @@
+@page "/politician/{Id:int}"
 @using FollowTheMoney.Models
+@rendermode InteractiveServer
 
-<div class="search-container mb-3">
-    <div class="row g-3">
-        <div class="col-md-6">
-            <input type="text" 
-                   class="form-control" 
-                   @bind="searchText" 
-                   @bind:event="oninput"
-                   @onkeyup="HandleKeyUp" 
-                   placeholder="Search politicians..." />
+<PageTitle>@politician?.FullName</PageTitle>
+
+@if (politician != null)
+{
+    <div class="container mt-4">
+        <div class="card">
+            <div class="card-header">
+                <h2>@politician.FullName</h2>
+                @if (politician.PoliticalParty != null)
+                {
+                    <span class="badge bg-primary">@politician.PoliticalParty.Abbreviation</span>
+                }
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>Personal Information</h5>
+                        <p><strong>First Name:</strong> @politician.FirstName</p>
+                        <p><strong>Last Name:</strong> @politician.LastName</p>
+                        <p><strong>Date of Birth:</strong> @politician.Dob.ToString("dd MMMM yyyy")</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Political Information</h5>
+                        <p><strong>Position:</strong> @politician.Position</p>
+                        <p><strong>Electoral Division:</strong> @politician.ElectoralDivision</p>
+                        <p><strong>State:</strong> @politician.State</p>
+                        @if (politician.PoliticalParty != null)
+                        {
+                            <p><strong>Political Party:</strong> @politician.PoliticalParty.Name (@politician.PoliticalParty.Abbreviation)</p>
+                            <p><strong>Party Founded:</strong> @politician.PoliticalParty.Founded.ToString("dd MMMM yyyy")</p>
+                        }
+                    </div>
+                </div>
+                
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <h5>Term Information</h5>
+                        <p><strong>Term Start:</strong> @politician.TermStartDate.ToString("dd MMMM yyyy")</p>
+                        <p><strong>Term End:</strong> @(politician.TermEndDate?.ToString("dd MMMM yyyy") ?? "Current")</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Record Information</h5>
+                        <p><strong>Created:</strong> @politician.CreatedDate</p>
+                        <p><strong>Updated:</strong> @politician.UpdatedDate</p>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <h5>Related Information</h5>
+                    <p><strong>Organisations:</strong> @politician.Organisations.Count</p>
+                    <p><strong>Stocks:</strong> @politician.Stocks.Count</p>
+                    <p><strong>Assets:</strong> @politician.Assets.Count</p>
+                    <p><strong>Donations:</strong> @politician.Donations.Count</p>
+                </div>
+            </div>
         </div>
-        <div class="col-md-3">
-    <select class="form-select" @bind="selectedParty" @bind:after="PerformSearch">
-        <option value="">All Parties</option>
-        <option value="ALP">Labor (ALP)</option>
-        <option value="LIB">Liberal (LIB)</option>
-        <option value="GRN">Greens (GRN)</option>
-    </select>
-</div>
-<div class="col-md-3">
-    <select class="form-select" @bind="selectedState" @bind:after="PerformSearch">
-        <option value="">All States</option>
-        <option value="NSW">NSW</option>
-        <option value="VIC">VIC</option>
-        <option value="QLD">QLD</option>
-        <option value="SA">SA</option>
-        <option value="WA">WA</option>
-        <option value="TAS">TAS</option>
-        <option value="ACT">ACT</option>
-        <option value="NT">NT</option>
-    </select>
-</div>
+        
+        <a href="/" class="btn btn-secondary mt-3">Back to Home</a>
     </div>
-    <div class="row mt-2">
-        <div class="col">
-            <button class="btn btn-primary" @onclick="PerformSearch">Search</button>
-            <button class="btn btn-secondary ms-2" @onclick="ClearFilters">Clear Filters</button>
+}
+else
+{
+    <div class="container mt-4">
+        <div class="alert alert-warning">
+            <h4>Politician Not Found</h4>
+            <p>The politician with ID @Id could not be found.</p>
+            <a href="/" class="btn btn-primary">Return to Home</a>
         </div>
     </div>
-</div>
+}
 
 @code {
-    private string searchText = "";
-    private string selectedParty = "";
-    private string selectedState = "";
-    private List<Politician> allPoliticians = new();
-    
     [Parameter]
-    public EventCallback<List<Politician>> OnSearchCompleted { get; set; }
+    public int Id { get; set; }
+    
+    private Politician? politician;
 
     protected override void OnInitialized()
     {
-        allPoliticians = GetDummyPoliticians();
-        Console.WriteLine($"Loaded {allPoliticians.Count} politicians");
-    }
-
-    private async Task PerformSearch()
-    {
-        Console.WriteLine($"PerformSearch called with: '{searchText}', Party: '{selectedParty}', State: '{selectedState}'");
-        var results = await SearchPoliticians(searchText, selectedParty, selectedState);
-        Console.WriteLine($"Found {results.Count} results");
-        
-        await OnSearchCompleted.InvokeAsync(results);
-        Console.WriteLine("Invoked callback");
-    }
-    
-    private async Task ClearFilters()
-    {
-        searchText = "";
-        selectedParty = "";
-        selectedState = "";
-        await PerformSearch();
-    }
-    
-    private async Task HandleKeyUp(KeyboardEventArgs e)
-    {
-        Console.WriteLine($"Key pressed: {e.Key}");
-        if (e.Key == "Enter")
-        {
-            await PerformSearch();
-        }
-    }
-    
-    private async Task<List<Politician>> SearchPoliticians(string query, string party, string state)
-    {
-        await Task.Delay(100);
-        
-        var results = allPoliticians.AsEnumerable();
-        
-        // Filter by search text
-        if (!string.IsNullOrWhiteSpace(query))
-        {
-            results = results.Where(p => 
-                p.FirstName.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-                p.LastName.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-                p.ElectoralDivision.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-                p.State.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-                p.Position.Contains(query, StringComparison.OrdinalIgnoreCase));
-        }
-        
-        // Filter by party
-        if (!string.IsNullOrWhiteSpace(party))
-        {
-            results = results.Where(p => p.PoliticalParty?.Abbreviation == party);
-        }
-        
-        // Filter by state
-        if (!string.IsNullOrWhiteSpace(state))
-        {
-            results = results.Where(p => p.State == state);
-        }
-        
-        var finalResults = results.ToList();
-        Console.WriteLine($"Filtered to {finalResults.Count} results");
-        return finalResults;
+        politician = GetDummyPoliticians().FirstOrDefault(p => p.Id == Id);
     }
     
     private List<Politician> GetDummyPoliticians()

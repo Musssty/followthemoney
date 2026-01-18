@@ -2,9 +2,10 @@
 @using FollowTheMoney.Models
 @rendermode InteractiveServer
 
-<PageTitle>Home</PageTitle>
+<PageTitle>FTM</PageTitle>
 
-<h1>Welcome</h1>
+<h1>FTM</h1>
+<p>Welcome to Follow The Money - Search for politicians and organisations below:</p>
 
 <SearchBar OnSearchCompleted="@HandleSearchResults" />
 
@@ -15,11 +16,14 @@
         <div class="list-group">
             @foreach (var politician in searchResults)
             {
-                <div class="list-group-item">
+                <a href="/politician/@politician.Id" class="list-group-item list-group-item-action text-decoration-none">
                     <h5>@politician.FullName</h5>
                     <p class="mb-1"><strong>Position:</strong> @politician.Position</p>
                     <p class="mb-1"><strong>Electoral Division:</strong> @politician.ElectoralDivision, @politician.State</p>
-                </div>
+                    <p class="mb-1"><strong>Term:</strong> @politician.TermStartDate.ToString("yyyy-MM-dd") - @(politician.TermEndDate?.ToString("yyyy-MM-dd") ?? "Present")</p>
+                    
+
+                </a>
             }
         </div>
     </div>
