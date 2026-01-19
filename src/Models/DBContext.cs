@@ -9,4 +9,7 @@ public class DBContext : DbContext
     public DbSet<PoliticalParty> PoliticalParties { get; set; }
     public DbSet<Politician> Politicians { get; set; }
     public DbSet<Stock> Stocks { get; set; }
+    
+    protected override void OnConfiguring(DbContextOptionsBuilder options)
+        => options.UseSqlite("Data Source=myapp.db");
 }
