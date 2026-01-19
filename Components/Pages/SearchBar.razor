@@ -70,14 +70,7 @@
         selectedState = "";
         await PerformSearch();
     }
-    
-    private async Task ClearFilters()
-    {
-        searchText = "";
-        selectedParty = "";
-        selectedState = "";
-        await PerformSearch();
-    }
+
     
     private async Task<List<Politician>> SearchPoliticians(string query, string party, string state)
     {
