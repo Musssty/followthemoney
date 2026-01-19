@@ -13,9 +13,8 @@ public class Organisation
     public string? Website { get; set; }
     public DateTime CreatedDate { get; set; }
     public DateTime UpdatedDate { get; set; }
-
+    
     public List<Politician> Politicians { get; set; } = new();
     public List<PoliticalParty> PoliticalParties { get; set; } = new();
     public List<Donation> Donations { get; set; } = new();
-
 }
