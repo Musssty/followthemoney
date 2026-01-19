@@ -11,5 +11,5 @@ public class DBContext : DbContext
     public DbSet<Stock> Stocks { get; set; }
     
     protected override void OnConfiguring(DbContextOptionsBuilder options)
-        => options.UseSqlite("Data Source=myapp.db");
+        => options.UseSqlite("Data Source=database.db");
 }
