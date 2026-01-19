@@ -60,7 +60,6 @@
     {
         var results = await SearchPoliticians(searchText, selectedParty, selectedState);
         await OnSearchCompleted.InvokeAsync(results);
-        Console.WriteLine("Invoked callback");
     }
     
     private async Task ClearFilters()
@@ -70,7 +69,6 @@
         selectedState = "";
         await PerformSearch();
     }
-
     
     private async Task<List<Politician>> SearchPoliticians(string query, string party, string state)
     {
