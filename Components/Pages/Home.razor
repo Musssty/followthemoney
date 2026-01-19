@@ -4,8 +4,8 @@
 
 <PageTitle>FTM</PageTitle>
 
-<h1>FTM</h1>
-<p>Welcome to Follow The Money - Search for politicians and organisations below:</p>
+<h1>Welcome to FTM</h1>
+<p>Follow the Money helps you find information about politicians and their financial disclosures.</p>
 
 <SearchBar OnSearchCompleted="@HandleSearchResults" />
 
@@ -16,17 +16,18 @@
         <div class="list-group">
             @foreach (var politician in searchResults)
             {
-                <a href="/politician/@politician.Id" class="list-group-item list-group-item-action text-decoration-none">
+                <a href="/politician/@politician.Id" class="list-group-item list-group-item-action">
                     <h5>@politician.FullName</h5>
                     <p class="mb-1"><strong>Position:</strong> @politician.Position</p>
                     <p class="mb-1"><strong>Electoral Division:</strong> @politician.ElectoralDivision, @politician.State</p>
-                    <p class="mb-1"><strong>Term:</strong> @politician.TermStartDate.ToString("yyyy-MM-dd") - @(politician.TermEndDate?.ToString("yyyy-MM-dd") ?? "Present")</p>
-                    
-
                 </a>
             }
         </div>
     </div>
+}
+else
+{
+    <p class="text-muted mt-3">No search results yet. Try searching for a politician.</p>
 }
 
 @code {
@@ -34,6 +35,7 @@
 
     private Task HandleSearchResults(List<Politician> results)
     {
+        Console.WriteLine($"Home received {results.Count} results");
         searchResults = results;
         StateHasChanged();
         return Task.CompletedTask;

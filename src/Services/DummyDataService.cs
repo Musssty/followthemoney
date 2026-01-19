@@ -1,93 +1,10 @@
-@page "/politician/{Id:int}"
-@using FollowTheMoney.Models
-@using FollowTheMoney.Services
-@inject DummyDataService DummyData
-@rendermode InteractiveServer
+using FollowTheMoney.Models;
 
-<PageTitle>@politician?.FullName</PageTitle>
+namespace FollowTheMoney.Services;
 
-@if (politician != null)
+public class DummyDataService
 {
-    <div class="container mt-4">
-        <div class="card">
-            <div class="card-header">
-                <h2>@politician.FullName</h2>
-                @if (politician.PoliticalParty != null)
-                {
-                    <span class="badge bg-primary">@politician.PoliticalParty.Abbreviation</span>
-                }
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <h5>Personal Information</h5>
-                        <p><strong>First Name:</strong> @politician.FirstName</p>
-                        <p><strong>Last Name:</strong> @politician.LastName</p>
-                        <p><strong>Date of Birth:</strong> @politician.Dob.ToString("dd MMMM yyyy")</p>
-                    </div>
-                    <div class="col-md-6">
-                        <h5>Political Information</h5>
-                        <p><strong>Position:</strong> @politician.Position</p>
-                        <p><strong>Electoral Division:</strong> @politician.ElectoralDivision</p>
-                        <p><strong>State:</strong> @politician.State</p>
-                        @if (politician.PoliticalParty != null)
-                        {
-                            <p><strong>Political Party:</strong> @politician.PoliticalParty.Name (@politician.PoliticalParty.Abbreviation)</p>
-                            <p><strong>Party Founded:</strong> @politician.PoliticalParty.Founded.ToString("dd MMMM yyyy")</p>
-                        }
-                    </div>
-                </div>
-                
-                <div class="row mt-4">
-                    <div class="col-md-6">
-                        <h5>Term Information</h5>
-                        <p><strong>Term Start:</strong> @politician.TermStartDate.ToString("dd MMMM yyyy")</p>
-                        <p><strong>Term End:</strong> @(politician.TermEndDate?.ToString("dd MMMM yyyy") ?? "Current")</p>
-                    </div>
-                    <div class="col-md-6">
-                        <h5>Record Information</h5>
-                        <p><strong>Created:</strong> @politician.CreatedDate</p>
-                        <p><strong>Updated:</strong> @politician.UpdatedDate</p>
-                    </div>
-                </div>
-
-                <div class="mt-4">
-                    <h5>Related Information</h5>
-                    <p><strong>Organisations:</strong> @politician.Organisations.Count</p>
-                    <p><strong>Stocks:</strong> @politician.Stocks.Count</p>
-                    <p><strong>Assets:</strong> @politician.Assets.Count</p>
-                    <p><strong>Donations:</strong> @politician.Donations.Count</p>
-                </div>
-            </div>
-        </div>
-        
-        <a href="/" class="btn btn-secondary mt-3">Back to Home</a>
-    </div>
-}
-else
-{
-    <div class="container mt-4">
-        <div class="alert alert-warning">
-            <h4>Politician Not Found</h4>
-            <p>The politician with ID @Id could not be found.</p>
-            <a href="/" class="btn btn-primary">Return to Home</a>
-        </div>
-    </div>
-}
-
-@code {
-    [Parameter]
-    public int Id { get; set; }
-    
-    private Politician? politician;
-
-    protected override void OnInitialized()
-    {
-        politician = DummyData.GetPoliticians().FirstOrDefault(p => p.Id == Id);
-        politician = GetDummyPoliticians().FirstOrDefault(p => p.Id == Id);
-    }
-    
-    private List<Politician> GetDummyPoliticians()
+    public List<Politician> GetPoliticians()
     {
         return new List<Politician>
         {
