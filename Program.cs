@@ -9,6 +9,7 @@ builder.Services.AddRazorComponents()
 
 // Register the DummyDataService
 builder.Services.AddScoped<DummyDataService>();
+builder.Services.AddScoped<DummyOrganisationService>(); 
 
 var app = builder.Build();
 
