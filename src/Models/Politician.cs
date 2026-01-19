@@ -13,6 +13,7 @@ public class Politician
     public string Position { get; set; }
     public string CreatedDate { get; set; }
     public string UpdatedDate { get; set; }
+    
 
 
 
@@ -28,6 +29,7 @@ public class Politician
     public List<Stock> Stocks { get; set; } = new();
     public List<Asset> Assets { get; set; } = new();
     public List<Donation> Donations { get; set; } = new();
+    // politicians can also have gifts so create a list and gifts class
 
     // just for convenience
     public string FullName => $"{FirstName} {LastName}";
