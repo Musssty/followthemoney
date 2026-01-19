@@ -1,13 +1,50 @@
 @using FollowTheMoney.Models
-@using Microsoft.AspNetCore.Components.Web
+@using FollowTheMoney.Services
+@inject DummyDataService DummyData
 
-<div class="search-container">
-    <input type="text" @bind="searchText" @bind:event="oninput" @onkeyup="HandleKeyUp" />
-    <button @onclick="PerformSearch">Search</button>
+<div class="search-container mb-3">
+    <div class="row g-3">
+        <div class="col-md-6">
+            <input type="text" 
+                   class="form-control" 
+                   @bind="searchText" 
+                   @bind:event="oninput"
+                   @bind:after="PerformSearch"
+                   placeholder="Search politicians..." />
+        </div>
+        <div class="col-md-3">
+            <select class="form-select" @bind="selectedParty" @bind:after="PerformSearch">
+                <option value="">All Parties</option>
+                <option value="ALP">Labor (ALP)</option>
+                <option value="LIB">Liberal (LIB)</option>
+                <option value="GRN">Greens (GRN)</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select class="form-select" @bind="selectedState" @bind:after="PerformSearch">
+                <option value="">All States</option>
+                <option value="NSW">NSW</option>
+                <option value="VIC">VIC</option>
+                <option value="QLD">QLD</option>
+                <option value="SA">SA</option>
+                <option value="WA">WA</option>
+                <option value="TAS">TAS</option>
+                <option value="ACT">ACT</option>
+                <option value="NT">NT</option>
+            </select>
+        </div>
+    </div>
+    <div class="row mt-2">
+        <div class="col">
+            <button class="btn btn-secondary" @onclick="ClearFilters">Clear All Filters</button>
+        </div>
+    </div>
 </div>
 
 @code {
     private string searchText = "";
+    private string selectedParty = "";
+    private string selectedState = "";
     private List<Politician> allPoliticians = new();
     
     [Parameter]
@@ -15,164 +52,64 @@
 
     protected override void OnInitialized()
     {
-        allPoliticians = GetDummyPoliticians();
+        allPoliticians = DummyData.GetPoliticians();
+        PerformSearch();
     }
 
     private async Task PerformSearch()
     {
-        var results = await SearchPoliticians(searchText);
+        var results = await SearchPoliticians(searchText, selectedParty, selectedState);
         await OnSearchCompleted.InvokeAsync(results);
     }
     
-    private async Task HandleKeyUp(KeyboardEventArgs e)
+    private async Task ClearFilters()
     {
-        if (e.Key == "Enter")
-        {
-            await PerformSearch();
-        }
+        searchText = "";
+        selectedParty = "";
+        selectedState = "";
+        await PerformSearch();
     }
     
-    private async Task<List<Politician>> SearchPoliticians(string query)
+    private async Task<List<Politician>> SearchPoliticians(string query, string party, string state)
     {
-        await Task.Delay(100); // Simulate async operation
+        await Task.Delay(50);
         
-        if (string.IsNullOrWhiteSpace(query))
-            return allPoliticians;
+        var results = allPoliticians.AsEnumerable();
         
-        return allPoliticians
-            .Where(p => 
+        if (!string.IsNullOrWhiteSpace(query))
+        {
+            results = results.Where(p => 
                 p.FirstName.Contains(query, StringComparison.OrdinalIgnoreCase) ||
                 p.LastName.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                p.FullName.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                p.Position.Contains(query, StringComparison.OrdinalIgnoreCase) ||
                 p.ElectoralDivision.Contains(query, StringComparison.OrdinalIgnoreCase) ||
                 p.State.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-                p.Position.Contains(query, StringComparison.OrdinalIgnoreCase))
-            .ToList();
-    }
-    
-    private List<Politician> GetDummyPoliticians()
-    {
-        return new List<Politician>
+                p.Dob.ToString("dd MMMM yyyy").Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                p.Dob.Year.ToString().Contains(query) ||
+                p.TermStartDate.ToString("dd MMMM yyyy").Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                p.TermStartDate.Year.ToString().Contains(query) ||
+                (p.TermEndDate.HasValue && p.TermEndDate.Value.ToString("dd MMMM yyyy").Contains(query, StringComparison.OrdinalIgnoreCase)) ||
+                (p.PoliticalParty != null && (
+                    p.PoliticalParty.Name.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                    p.PoliticalParty.Abbreviation.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                    p.PoliticalParty.Founded.ToString("dd MMMM yyyy").Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                    p.PoliticalParty.Founded.Year.ToString().Contains(query)
+                )) ||
+                p.Id.ToString().Contains(query)
+            );
+        }
+        
+        if (!string.IsNullOrWhiteSpace(party))
         {
-            new Politician
-            {
-                Id = 1,
-                FirstName = "Anthony",
-                LastName = "Albanese",
-                ElectoralDivision = "Grayndler",
-                State = "NSW",
-                Dob = new DateTime(1963, 3, 2),
-                TermStartDate = new DateTime(2022, 5, 23),
-                TermEndDate = null,
-                Position = "Prime Minister",
-                CreatedDate = DateTime.Now.ToString(),
-                UpdatedDate = DateTime.Now.ToString(),
-                PoliticalPartyId = 1
-            },
-            new Politician
-            {
-                Id = 2,
-                FirstName = "Peter",
-                LastName = "Dutton",
-                ElectoralDivision = "Dickson",
-                State = "QLD",
-                Dob = new DateTime(1970, 11, 18),
-                TermStartDate = new DateTime(2001, 11, 10),
-                TermEndDate = null,
-                Position = "Opposition Leader",
-                CreatedDate = DateTime.Now.ToString(),
-                UpdatedDate = DateTime.Now.ToString(),
-                PoliticalPartyId = 2
-            },
-            new Politician
-            {
-                Id = 3,
-                FirstName = "Penny",
-                LastName = "Wong",
-                ElectoralDivision = "South Australia",
-                State = "SA",
-                Dob = new DateTime(1968, 11, 5),
-                TermStartDate = new DateTime(2002, 7, 1),
-                TermEndDate = null,
-                Position = "Minister for Foreign Affairs",
-                CreatedDate = DateTime.Now.ToString(),
-                UpdatedDate = DateTime.Now.ToString(),
-                PoliticalPartyId = 1
-            },
-            new Politician
-            {
-                Id = 4,
-                FirstName = "Adam",
-                LastName = "Bandt",
-                ElectoralDivision = "Melbourne",
-                State = "VIC",
-                Dob = new DateTime(1972, 3, 11),
-                TermStartDate = new DateTime(2010, 8, 21),
-                TermEndDate = null,
-                Position = "Greens Leader",
-                CreatedDate = DateTime.Now.ToString(),
-                UpdatedDate = DateTime.Now.ToString(),
-                PoliticalPartyId = 3
-            },
-            new Politician
-            {
-                Id = 5,
-                FirstName = "Jim",
-                LastName = "Chalmers",
-                ElectoralDivision = "Rankin",
-                State = "QLD",
-                Dob = new DateTime(1978, 3, 2),
-                TermStartDate = new DateTime(2013, 9, 7),
-                TermEndDate = null,
-                Position = "Treasurer",
-                CreatedDate = DateTime.Now.ToString(),
-                UpdatedDate = DateTime.Now.ToString(),
-                PoliticalPartyId = 1
-            },
-            new Politician
-            {
-                Id = 6,
-                FirstName = "Tanya",
-                LastName = "Plibersek",
-                ElectoralDivision = "Sydney",
-                State = "NSW",
-                Dob = new DateTime(1969, 12, 2),
-                TermStartDate = new DateTime(1998, 10, 3),
-                TermEndDate = null,
-                Position = "Minister for the Environment and Water",
-                CreatedDate = DateTime.Now.ToString(),
-                UpdatedDate = DateTime.Now.ToString(),
-                PoliticalPartyId = 1
-            },
-            new Politician
-            {
-                Id = 7,
-                FirstName = "Sussan",
-                LastName = "Ley",
-                ElectoralDivision = "Farrer",
-                State = "NSW",
-                Dob = new DateTime(1961, 12, 14),
-                TermStartDate = new DateTime(2001, 11, 10),
-                TermEndDate = null,
-                Position = "Deputy Opposition Leader",
-                CreatedDate = DateTime.Now.ToString(),
-                UpdatedDate = DateTime.Now.ToString(),
-                PoliticalPartyId = 2
-            },
-            new Politician
-            {
-                Id = 8,
-                FirstName = "Richard",
-                LastName = "Marles",
-                ElectoralDivision = "Corio",
-                State = "VIC",
-                Dob = new DateTime(1967, 7, 13),
-                TermStartDate = new DateTime(2007, 11, 24),
-                TermEndDate = null,
-                Position = "Deputy Prime Minister",
-                CreatedDate = DateTime.Now.ToString(),
-                UpdatedDate = DateTime.Now.ToString(),
-                PoliticalPartyId = 1
-            }
-        };
+            results = results.Where(p => p.PoliticalParty?.Abbreviation == party);
+        }
+        
+        if (!string.IsNullOrWhiteSpace(state))
+        {
+            results = results.Where(p => p.State == state);
+        }
+        
+        return results.ToList();
     }
 }

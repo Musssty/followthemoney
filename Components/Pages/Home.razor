@@ -2,9 +2,10 @@
 @using FollowTheMoney.Models
 @rendermode InteractiveServer
 
-<PageTitle>Home</PageTitle>
+<PageTitle>FTM</PageTitle>
 
-<h1>Welcome</h1>
+<h1>Welcome to FTM</h1>
+<p>Follow the Money helps you find information about politicians and their financial disclosures.</p>
 
 <SearchBar OnSearchCompleted="@HandleSearchResults" />
 
@@ -15,14 +16,18 @@
         <div class="list-group">
             @foreach (var politician in searchResults)
             {
-                <div class="list-group-item">
+                <a href="/politician/@politician.Id" class="list-group-item list-group-item-action">
                     <h5>@politician.FullName</h5>
                     <p class="mb-1"><strong>Position:</strong> @politician.Position</p>
                     <p class="mb-1"><strong>Electoral Division:</strong> @politician.ElectoralDivision, @politician.State</p>
-                </div>
+                </a>
             }
         </div>
     </div>
+}
+else
+{
+    <p class="text-muted mt-3">No search results yet. Try searching for a politician.</p>
 }
 
 @code {
@@ -30,6 +35,7 @@
 
     private Task HandleSearchResults(List<Politician> results)
     {
+        Console.WriteLine($"Home received {results.Count} results");
         searchResults = results;
         StateHasChanged();
         return Task.CompletedTask;
