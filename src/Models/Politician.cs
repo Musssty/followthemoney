@@ -2,35 +2,31 @@ namespace FollowTheMoney.Models;
 
 public class Politician
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
     public required string FirstName { get; set; }
-    public string LastName { get; set; }
-    public string ElectoralDivision { get; set; }
-    public string State { get; set; }
+    public required string LastName { get; set; }
+    public string? ElectoralDivision { get; set; }
+    public string? State { get; set; }
     public DateTime Dob { get; set; }
     public DateTime TermStartDate { get; set; }
     public DateTime? TermEndDate { get; set; }
-    public string Position { get; set; }
-    public string CreatedDate { get; set; }
-    public string UpdatedDate { get; set; }
-    
+    public string? Position { get; set; }
 
+    public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+    public DateTime UpdatedDate { get; set; } = DateTime.UtcNow;
 
-
-    // Foreign Keys - these imply only one
-    public int PoliticalPartyId { get; set; }
-
-    // Navigation property for single relationships
+    // Foreign key
+    public Guid PoliticalPartyId { get; set; }
     public PoliticalParty? PoliticalParty { get; set; }
 
-    // Navigation properties for multiple relationships
-    // navigation properties allow the querying of information much easier and other benefits that i dont understand
-    public List<Organisation> Organisations { get; set; } = new();
+    // Many-to-many
+    public List<PoliticianOrganisation> PoliticianOrganisations { get; set; } = new();
+    public List<PoliticianDonation> PoliticianDonations { get; set; } = new();
+
+    // One-to-many
     public List<Stock> Stocks { get; set; } = new();
     public List<Asset> Assets { get; set; } = new();
-    public List<Donation> Donations { get; set; } = new();
-    // politicians can also have gifts so create a list and gifts class
+    public List<Gift> Gifts { get; set; } = new();
 
-    // just for convenience
     public string FullName => $"{FirstName} {LastName}";
 }

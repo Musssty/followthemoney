@@ -1,4 +1,4 @@
-@page "/politician/{Id:int}"
+@page "/politician/{Id:guid}"
 @using FollowTheMoney.Models
 @using FollowTheMoney.Services
 @inject DummyDataService DummyData
@@ -77,7 +77,7 @@ else
 
 @code {
     [Parameter]
-    public int Id { get; set; }
+    public Guid Id { get; set; }
     
     private Politician? politician;
 

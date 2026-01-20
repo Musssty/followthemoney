@@ -10,7 +10,7 @@ public class DummyDataService
         {
             new Politician
             {
-                Id = 1,
+                Id = Guid.Parse("f3c1a8b2-9d44-4c2e-8f0b-1a2d9e7c4b11"),
                 FirstName = "Anthony",
                 LastName = "Albanese",
                 ElectoralDivision = "Grayndler",
@@ -34,7 +34,7 @@ public class DummyDataService
             },
             new Politician
             {
-                Id = 2,
+                Id = Guid.Parse("0a7d3f92-5b6e-4e8a-9c33-2f4b8d1e77aa"),
                 FirstName = "Peter",
                 LastName = "Dutton",
                 ElectoralDivision = "Dickson",
@@ -58,7 +58,7 @@ public class DummyDataService
             },
             new Politician
             {
-                Id = 3,
+                Id = Guid.Parse("c4e8b1d0-2f9a-4c6b-8e55-91a0c3f4d2ef"),
                 FirstName = "Penny",
                 LastName = "Wong",
                 ElectoralDivision = "South Australia",
@@ -82,7 +82,7 @@ public class DummyDataService
             },
             new Politician
             {
-                Id = 4,
+                Id = Guid.Parse("9b22e4c1-7f88-4d3a-bc10-5e6f7a8b9c01"),
                 FirstName = "Adam",
                 LastName = "Bandt",
                 ElectoralDivision = "Melbourne",
@@ -106,7 +106,7 @@ public class DummyDataService
             },
             new Politician
             {
-                Id = 5,
+                Id = Guid.Parse("1d4f8a77-3b2c-4e9d-8f11-0c9a7b6e5d44"),
                 FirstName = "Jim",
                 LastName = "Chalmers",
                 ElectoralDivision = "Rankin",
@@ -130,7 +130,7 @@ public class DummyDataService
             },
             new Politician
             {
-                Id = 6,
+                Id = Guid.Parse("ab7c1e90-4f33-4d8e-9a22-7e5d1c0b3f88"),
                 FirstName = "Tanya",
                 LastName = "Plibersek",
                 ElectoralDivision = "Sydney",
@@ -154,7 +154,7 @@ public class DummyDataService
             },
             new Politician
             {
-                Id = 7,
+                Id = Guid.Parse("e8d1c4a2-6b77-4f0e-8c99-2a1f5d3b7e66"),
                 FirstName = "Sussan",
                 LastName = "Ley",
                 ElectoralDivision = "Farrer",
@@ -178,7 +178,7 @@ public class DummyDataService
             },
             new Politician
             {
-                Id = 8,
+                Id = Guid.Parse("3a9f0d11-8c44-4b2e-bf77-4d0a9c1e2b55"),
                 FirstName = "Richard",
                 LastName = "Marles",
                 ElectoralDivision = "Corio",
