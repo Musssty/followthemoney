@@ -19,19 +19,11 @@ public class Politician
     public Guid PoliticalPartyId { get; set; }
     public PoliticalParty? PoliticalParty { get; set; }
 
-<<<<<<< HEAD
-    // Many-to-many - ADD = new() to all these
-    public List<PoliticianOrganisation> PoliticianOrganisations { get; set; } = new();
-    public List<PoliticianDonation> PoliticianDonations { get; set; } = new();
-
-    // One-to-many - ADD = new() to all these
-=======
     // Many-to-many
     public List<PoliticianOrganisation> PoliticianOrganisations { get; set; } = new();
     public List<PoliticianDonation> PoliticianDonations { get; set; } = new();
 
     // One-to-many
->>>>>>> 1566e645d8648ed45d622c6a5bcb52d50dbbf2d5
     public List<Stock> Stocks { get; set; } = new();
     public List<Asset> Assets { get; set; } = new();
     public List<Gift> Gifts { get; set; } = new();

@@ -1,9 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-<<<<<<< HEAD
 using FollowTheMoney.Models;
-=======
-using FollowTheMoney.Models.JoinEntities;
->>>>>>> 1566e645d8648ed45d622c6a5bcb52d50dbbf2d5
 
 namespace FollowTheMoney.Models;
 
@@ -27,11 +23,7 @@ public class FollowTheMoneyDbContext : DbContext
     public DbSet<PoliticianOrganisation> PoliticianOrganisations { get; set; }
     public DbSet<OrganisationPoliticalParty> OrganisationPoliticalParties { get; set; }
     public DbSet<PoliticianDonation> PoliticianDonations { get; set; }
-<<<<<<< HEAD
     
-=======
-
->>>>>>> 1566e645d8648ed45d622c6a5bcb52d50dbbf2d5
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -61,11 +53,7 @@ public class FollowTheMoneyDbContext : DbContext
 
         modelBuilder.Entity<OrganisationPoliticalParty>()
             .HasOne(op => op.PoliticalParty)
-<<<<<<< HEAD
             .WithMany(pp => pp.OrganisationPoliticalParties)
-=======
-            .WithMany(pp => pp.Donations)
->>>>>>> 1566e645d8648ed45d622c6a5bcb52d50dbbf2d5
             .HasForeignKey(op => op.PoliticalPartyId);
 
         // Politician ↔ Donation
