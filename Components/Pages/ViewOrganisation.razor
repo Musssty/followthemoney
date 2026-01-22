@@ -1,0 +1,218 @@
+@page "/organisation/{Id:guid}"
+@using FollowTheMoney.Models
+@using FollowTheMoney.Services
+@inject DummyDataService DummyData
+@inject DummyOrganisationService DummyOrganisation
+@rendermode InteractiveServer
+
+<h1 class="mb-4">Organisation Details</h1>
+
+@if (isLoading)
+{
+    <div class="d-flex justify-content-center">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+}
+else if (organisation != null)
+{
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h2 class="card-title mb-4">@organisation.Name</h2>
+            
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="card border-0 bg-light p-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-semibold">ID:</span>
+                            <span class="text-muted">@organisation.Id</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card border-0 bg-light p-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-semibold">Industry:</span>
+                            <span class="text-muted">@organisation.Industry</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3 mt-4">
+                <div class="col-md-4">
+                    <div class="card border-0 bg-light p-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-semibold">Type:</span>
+                            <span class="text-muted">@organisation.Type</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card border-0 bg-light p-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-semibold">Address:</span>
+                            <span class="text-muted">@organisation.Address</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card border-0 bg-light p-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-semibold">City:</span>
+                            <span class="text-muted">@organisation.City</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3 mt-4">
+                <div class="col-md-4">
+                    <div class="card border-0 bg-light p-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-semibold">State:</span>
+                            <span class="text-muted">@organisation.State</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card border-0 bg-light p-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-semibold">Postcode:</span>
+                            <span class="text-muted">@organisation.Postcode</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card border-0 bg-light p-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-semibold">Website:</span>
+                            <a href="@organisation.Website" target="_blank" class="text-decoration-none text-primary">
+                                <span class="text-muted">@organisation.Website</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 bg-light p-3 mt-4">
+                <h3 class="mb-3">Politician Organisations</h3>
+                @if (organisation.PoliticianOrganisations != null && organisation.PoliticianOrganisations.Any())
+                {
+                    <ul class="list-unstyled">
+                        @foreach (var politicianOrganisation in organisation.PoliticianOrganisations)
+                        {
+                            <li class="mb-2">
+                                <span class="fw-semibold">@politicianOrganisation.Politician.FullName</span> - 
+                                <span class="text-muted">@politicianOrganisation.Organisation.Name</span>
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p class="text-muted">No Politician Organisations found.</p>
+                }
+            </div>
+
+            <div class="card border-0 bg-light p-3 mt-4">
+                <h3 class="mb-3">Organisation Political Parties</h3>
+                @if (organisation.OrganisationPoliticalParties != null && organisation.OrganisationPoliticalParties.Any())
+                {
+                    <ul class="list-unstyled">
+                        @foreach (var organisationPoliticalParty in organisation.OrganisationPoliticalParties)
+                        {
+                            <li class="mb-2">
+                                <span class="fw-semibold">@organisationPoliticalParty.PoliticalParty.Name</span> - 
+                                <span class="text-muted">@organisationPoliticalParty.Organisation.Name</span>
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p class="text-muted">No Organisation Political Parties found.</p>
+                }
+            </div>
+
+            <div class="card border-0 bg-light p-3 mt-4">
+                <h3 class="mb-3">Donations</h3>
+                @if (organisation.Donations != null && organisation.Donations.Any())
+                {
+                    <ul class="list-unstyled">
+                        @foreach (var donation in organisation.Donations)
+                        {
+                            <li class="mb-2">
+                                <span class="fw-semibold">@donation.Amount</span> - 
+                                <span class="text-muted">@donation.DonationDate.ToString("dd/MM/yyyy")</span>
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p class="text-muted">No Donations found.</p>
+                }
+            </div>
+
+            <div class="row g-3 mt-4">
+                <div class="col-md-6">
+                    <div class="card border-0 bg-light p-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-semibold">Created Date:</span>
+                            <span class="text-muted">@organisation.CreatedDate.ToString("dd/MM/yyyy")</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card border-0 bg-light p-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-semibold">Updated Date:</span>
+                            <span class="text-muted">@organisation.UpdatedDate.ToString("dd/MM/yyyy")</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="text-center py-5">
+        <p class="text-muted">Organisation not found.</p>
+    </div>
+}
+
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private Organisation? organisation;
+    private bool isLoading = true;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await Task.Delay(millisecondsDelay: 1);
+        Console.WriteLine(value: $"ViewPage - Looking for ID: {Id}");
+        List<Organisation>? allOrganisations = DummyOrganisation.GetOrganisations();
+        Console.WriteLine(value: $"ViewPage - Found {allOrganisations.Count} politicians total");
+
+        foreach (var p in allOrganisations)
+        {
+            Console.WriteLine($" - {p.Name}: {p.Id}");
+        }
+
+        organisation = allOrganisations.FirstOrDefault(p => p.Id == Id);
+        Console.WriteLine($"ViewPage - Match found: {(organisation != null ? organisation.Name : "NONE")}");
+
+        isLoading = false;
+    }
+}
