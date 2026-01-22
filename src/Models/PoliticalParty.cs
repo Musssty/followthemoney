@@ -10,6 +10,8 @@ public class PoliticalParty
     public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedDate { get; set; } = DateTime.UtcNow;
 
-    public List<Politician> Politicians { get; set; } = new();
-    public List<Donation> Donations { get; set; } = new();
+    public List<Politician> Politicians { get; set; } 
+    public List<Donation> Donations { get; set; } 
+    public List<OrganisationPoliticalParty> OrganisationPoliticalParties { get; set; } = new();  // ADD THIS LINE
+
 }

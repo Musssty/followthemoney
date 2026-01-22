@@ -4,13 +4,25 @@ namespace FollowTheMoney.Services;
 
 public class DummyOrganisationService
 {
+    // Static GUIDs for organisations
+    private static readonly Guid AwuId = Guid.Parse("10000000-0000-0000-0000-000000000001");
+    private static readonly Guid BhpId = Guid.Parse("10000000-0000-0000-0000-000000000002");
+    private static readonly Guid ClimateCouncilId = Guid.Parse("10000000-0000-0000-0000-000000000003");
+    private static readonly Guid BcaId = Guid.Parse("10000000-0000-0000-0000-000000000004");
+    private static readonly Guid AcfId = Guid.Parse("10000000-0000-0000-0000-000000000005");
+    private static readonly Guid MasterBuildersId = Guid.Parse("10000000-0000-0000-0000-000000000006");
+    private static readonly Guid AmaId = Guid.Parse("10000000-0000-0000-0000-000000000007");
+    private static readonly Guid ActuId = Guid.Parse("10000000-0000-0000-0000-000000000008");
+    private static readonly Guid MineralsCouncilId = Guid.Parse("10000000-0000-0000-0000-000000000009");
+    private static readonly Guid GetUpId = Guid.Parse("10000000-0000-0000-0000-000000000010");
+
     public List<Organisation> GetOrganisations()
     {
         return new List<Organisation>
         {
             new Organisation
             {
-                Id = 1,
+                Id = AwuId,
                 Name = "Australian Workers' Union",
                 Industry = "Labour Union",
                 Type = "Trade Union",
@@ -19,12 +31,12 @@ public class DummyOrganisationService
                 State = "NSW",
                 Postcode = "2142",
                 Website = "https://www.awu.net.au",
-                CreatedDate = DateTime.Now.AddYears(-5),
-                UpdatedDate = DateTime.Now
+                CreatedDate = DateTime.UtcNow.AddYears(-5),
+                UpdatedDate = DateTime.UtcNow
             },
             new Organisation
             {
-                Id = 2,
+                Id = BhpId,
                 Name = "BHP Group",
                 Industry = "Mining",
                 Type = "Corporation",
@@ -33,12 +45,12 @@ public class DummyOrganisationService
                 State = "VIC",
                 Postcode = "3000",
                 Website = "https://www.bhp.com",
-                CreatedDate = DateTime.Now.AddYears(-10),
-                UpdatedDate = DateTime.Now
+                CreatedDate = DateTime.UtcNow.AddYears(-10),
+                UpdatedDate = DateTime.UtcNow
             },
             new Organisation
             {
-                Id = 3,
+                Id = ClimateCouncilId,
                 Name = "Climate Council",
                 Industry = "Environmental Advocacy",
                 Type = "Non-Profit",
@@ -47,12 +59,12 @@ public class DummyOrganisationService
                 State = "NSW",
                 Postcode = "2000",
                 Website = "https://www.climatecouncil.org.au",
-                CreatedDate = DateTime.Now.AddYears(-8),
-                UpdatedDate = DateTime.Now
+                CreatedDate = DateTime.UtcNow.AddYears(-8),
+                UpdatedDate = DateTime.UtcNow
             },
             new Organisation
             {
-                Id = 4,
+                Id = BcaId,
                 Name = "Business Council of Australia",
                 Industry = "Business Advocacy",
                 Type = "Industry Association",
@@ -61,12 +73,12 @@ public class DummyOrganisationService
                 State = "VIC",
                 Postcode = "3000",
                 Website = "https://www.bca.com.au",
-                CreatedDate = DateTime.Now.AddYears(-12),
-                UpdatedDate = DateTime.Now
+                CreatedDate = DateTime.UtcNow.AddYears(-12),
+                UpdatedDate = DateTime.UtcNow
             },
             new Organisation
             {
-                Id = 5,
+                Id = AcfId,
                 Name = "Australian Conservation Foundation",
                 Industry = "Environmental Conservation",
                 Type = "Non-Profit",
@@ -75,12 +87,12 @@ public class DummyOrganisationService
                 State = "VIC",
                 Postcode = "3053",
                 Website = "https://www.acf.org.au",
-                CreatedDate = DateTime.Now.AddYears(-15),
-                UpdatedDate = DateTime.Now
+                CreatedDate = DateTime.UtcNow.AddYears(-15),
+                UpdatedDate = DateTime.UtcNow
             },
             new Organisation
             {
-                Id = 6,
+                Id = MasterBuildersId,
                 Name = "Master Builders Australia",
                 Industry = "Construction",
                 Type = "Industry Association",
@@ -89,12 +101,12 @@ public class DummyOrganisationService
                 State = "ACT",
                 Postcode = "2603",
                 Website = "https://www.masterbuilders.com.au",
-                CreatedDate = DateTime.Now.AddYears(-7),
-                UpdatedDate = DateTime.Now
+                CreatedDate = DateTime.UtcNow.AddYears(-7),
+                UpdatedDate = DateTime.UtcNow
             },
             new Organisation
             {
-                Id = 7,
+                Id = AmaId,
                 Name = "Australian Medical Association",
                 Industry = "Healthcare",
                 Type = "Professional Association",
@@ -103,12 +115,12 @@ public class DummyOrganisationService
                 State = "ACT",
                 Postcode = "2600",
                 Website = "https://www.ama.com.au",
-                CreatedDate = DateTime.Now.AddYears(-20),
-                UpdatedDate = DateTime.Now
+                CreatedDate = DateTime.UtcNow.AddYears(-20),
+                UpdatedDate = DateTime.UtcNow
             },
             new Organisation
             {
-                Id = 8,
+                Id = ActuId,
                 Name = "Australian Council of Trade Unions",
                 Industry = "Labour Union",
                 Type = "Trade Union",
@@ -117,12 +129,12 @@ public class DummyOrganisationService
                 State = "VIC",
                 Postcode = "3000",
                 Website = "https://www.actu.org.au",
-                CreatedDate = DateTime.Now.AddYears(-18),
-                UpdatedDate = DateTime.Now
+                CreatedDate = DateTime.UtcNow.AddYears(-18),
+                UpdatedDate = DateTime.UtcNow
             },
             new Organisation
             {
-                Id = 9,
+                Id = MineralsCouncilId,
                 Name = "Minerals Council of Australia",
                 Industry = "Mining",
                 Type = "Industry Association",
@@ -131,12 +143,12 @@ public class DummyOrganisationService
                 State = "ACT",
                 Postcode = "2603",
                 Website = "https://www.minerals.org.au",
-                CreatedDate = DateTime.Now.AddYears(-14),
-                UpdatedDate = DateTime.Now
+                CreatedDate = DateTime.UtcNow.AddYears(-14),
+                UpdatedDate = DateTime.UtcNow
             },
             new Organisation
             {
-                Id = 10,
+                Id = GetUpId,
                 Name = "GetUp!",
                 Industry = "Political Advocacy",
                 Type = "Non-Profit",
@@ -145,8 +157,8 @@ public class DummyOrganisationService
                 State = "NSW",
                 Postcode = "2000",
                 Website = "https://www.getup.org.au",
-                CreatedDate = DateTime.Now.AddYears(-6),
-                UpdatedDate = DateTime.Now
+                CreatedDate = DateTime.UtcNow.AddYears(-6),
+                UpdatedDate = DateTime.UtcNow
             }
         };
     }

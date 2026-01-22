@@ -1,6 +1,7 @@
+namespace FollowTheMoney.Models;
+
 using FollowTheMoney.Models;
 
-namespace FollowTheMoney.Models.JoinEntities;
 
 public class OrganisationPoliticalParty
 {

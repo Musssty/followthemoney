@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using FollowTheMoney.Models.JoinEntities;
+using FollowTheMoney.Models;
 
 namespace FollowTheMoney.Models;
 
@@ -23,7 +23,7 @@ public class FollowTheMoneyDbContext : DbContext
     public DbSet<PoliticianOrganisation> PoliticianOrganisations { get; set; }
     public DbSet<OrganisationPoliticalParty> OrganisationPoliticalParties { get; set; }
     public DbSet<PoliticianDonation> PoliticianDonations { get; set; }
-
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -53,7 +53,7 @@ public class FollowTheMoneyDbContext : DbContext
 
         modelBuilder.Entity<OrganisationPoliticalParty>()
             .HasOne(op => op.PoliticalParty)
-            .WithMany(pp => pp.Donations)
+            .WithMany(pp => pp.OrganisationPoliticalParties)
             .HasForeignKey(op => op.PoliticalPartyId);
 
         // Politician ↔ Donation

@@ -16,5 +16,5 @@ public class Donation
     public Guid PoliticalPartyId { get; set; }
     public PoliticalParty? PoliticalParty { get; set; }
 
-    public List<PoliticianDonation> PoliticianDonations { get; set; } = new();
+    public List<PoliticianDonation> PoliticianDonations { get; set; } 
 }

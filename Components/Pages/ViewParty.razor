@@ -1,0 +1,106 @@
+@page "/party/{Id:guid}"
+@using FollowTheMoney.Models
+@using FollowTheMoney.Services
+@inject DummyDataService DummyData
+@rendermode InteractiveServer
+
+<PageTitle>@(party?.Name ?? "Loading...")</PageTitle>
+
+@if (isLoading)
+{
+    <div class="container mt-4">
+        <p>Loading...</p>
+    </div>
+}
+else if (party != null)
+{
+    <div class="container mt-4">
+        <div class="card">
+            <div class="card-header">
+                <h2>@party.Name</h2>
+                <span class="badge bg-primary">@party.Abbreviation</span>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>Party Information</h5>
+                        <p><strong>Full Name:</strong> @party.Name</p>
+                        <p><strong>Abbreviation:</strong> @party.Abbreviation</p>
+                        <p><strong>Founded:</strong> @party.Founded.ToString("dd MMMM yyyy")</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Record Information</h5>
+                        <p><strong>Created:</strong> @party.CreatedDate.ToString("dd MMMM yyyy HH:mm")</p>
+                        <p><strong>Updated:</strong> @party.UpdatedDate.ToString("dd MMMM yyyy HH:mm")</p>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <h5>Members (@party.Politicians.Count)</h5>
+                    @if (party.Politicians.Any())
+                    {
+                        <div class="list-group">
+                            @foreach (var politician in party.Politicians.OrderBy(p => p.LastName))
+                            {
+                                <a href="/politician/@politician.Id" class="list-group-item list-group-item-action">
+                                    <h6>@politician.FullName</h6>
+                                    <p class="mb-1"><strong>Position:</strong> @politician.Position</p>
+                                    <p class="mb-0"><strong>Electoral Division:</strong> @politician.ElectoralDivision, @politician.State</p>
+                                </a>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No members found.</p>
+                    }
+                </div>
+
+                <div class="mt-4">
+                    <h5>Related Information</h5>
+                    <p><strong>Donations:</strong> @party.Donations.Count</p>
+                    <p><strong>Organisation Partnerships:</strong> @party.OrganisationPoliticalParties.Count</p>
+                </div>
+            </div>
+        </div>
+        
+        <a href="/" class="btn btn-secondary mt-3">Back to Home</a>
+    </div>
+}
+else
+{
+    <div class="container mt-4">
+        <div class="alert alert-warning">
+            <h4>Political Party Not Found</h4>
+            <p>The political party with ID @Id could not be found.</p>
+            <a href="/" class="btn btn-primary">Return to Home</a>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+    
+    private PoliticalParty? party;
+    private bool isLoading = true;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await Task.Delay(1);
+        
+        // Get the party directly
+        party = DummyData.GetPoliticalParties().FirstOrDefault(p => p.Id == Id);
+        
+        // If we found the party, populate its Politicians list
+        if (party != null)
+        {
+            var allPoliticians = DummyData.GetPoliticians();
+            party.Politicians = allPoliticians
+                .Where(p => p.PoliticalPartyId == Id)
+                .ToList();
+        }
+        
+        isLoading = false;
+    }
+}
