@@ -16,5 +16,9 @@ public class Donation
     public Guid PoliticalPartyId { get; set; }
     public PoliticalParty? PoliticalParty { get; set; }
 
+<<<<<<< HEAD
     public List<PoliticianDonation> PoliticianDonations { get; set; } 
+=======
+    public List<PoliticianDonation> PoliticianDonations { get; set; } = new();
+>>>>>>> 1566e645d8648ed45d622c6a5bcb52d50dbbf2d5
 }
