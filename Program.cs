@@ -1,5 +1,7 @@
-using FollowTheMoney.Services;
 using FollowTheMoney.Components;
+using FollowTheMoney.Services;
+using FollowTheMoney.Models;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +12,10 @@ builder.Services.AddRazorComponents()
 // Register the DummyDataService
 builder.Services.AddScoped<DummyDataService>();
 builder.Services.AddScoped<DummyOrganisationService>(); 
+
+// Add DbContext configuration
+builder.Services.AddDbContext<FollowTheMoneyDbContext>(options =>
+    options.UseSqlite("Data Source=database.db"));
 
 var app = builder.Build();
 
