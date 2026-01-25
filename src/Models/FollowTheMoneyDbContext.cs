@@ -18,6 +18,7 @@ public class FollowTheMoneyDbContext : DbContext
     public DbSet<Stock> Stocks { get; set; }
     public DbSet<Asset> Assets { get; set; }
     public DbSet<Gift> Gifts { get; set; }
+    public DbSet<GovOrg> GovOrgs { get; set; }
 
     // Join Entities
     public DbSet<PoliticianOrganisation> PoliticianOrganisations { get; set; }

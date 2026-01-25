@@ -2,7 +2,7 @@ namespace FollowTheMoney.Models;
 
 public class Asset
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; set; } 
     public required string Description { get; set; }
     public double? Value { get; set; }
     public DateTime AcquiredDate { get; set; }

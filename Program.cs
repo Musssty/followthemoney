@@ -12,9 +12,10 @@ builder.Services.AddRazorComponents()
 // Register the DummyDataService
 builder.Services.AddScoped<DummyDataService>();
 builder.Services.AddScoped<DummyOrganisationService>(); 
+builder.Services.AddScoped<CsvImportService>();
 
 // Add DbContext configuration
-builder.Services.AddDbContext<FollowTheMoneyDbContext>(options =>
+builder.Services.AddDbContextFactory<FollowTheMoneyDbContext>(options =>
     options.UseSqlite("Data Source=database.db"));
 
 var app = builder.Build();

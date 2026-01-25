@@ -1,0 +1,417 @@
+@page "/import-data"
+@using FollowTheMoney.Services
+@using FollowTheMoney.Models
+@using Microsoft.AspNetCore.Components.Forms
+@using static FollowTheMoney.Services.CsvImportService
+@inject CsvImportService CsvImport
+@rendermode InteractiveServer
+
+<PageTitle>Import Data</PageTitle>
+
+<div class="container mt-4">
+    <h2>Import Data from CSV</h2>
+
+    @if (step == 1)
+    {
+        <div class="card mt-3">
+            <div class="card-header">
+                <h4>Step 1: Select Entity Type</h4>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label"><strong>What type of data are you importing?</strong></label>
+                    <select class="form-select" @bind="selectedEntityType">
+                        <option value="">-- Select Entity Type --</option>
+                        <option value="GovOrg">Government Organisations</option>
+                        <option value="Politician">Politicians</option>
+                        <option value="Organisation">Organisations</option>
+                        <option value="Donation">Donations</option>
+                    </select>
+                </div>
+
+                @if (!string.IsNullOrEmpty(selectedEntityType))
+                {
+                    <button class="btn btn-primary" @onclick="LoadEntityProperties">Next</button>
+                }
+            </div>
+        </div>
+    }
+
+    @if (step == 2)
+    {
+        <div class="card mt-3">
+            <div class="card-header">
+                <h4>Step 2: Upload CSV File</h4>
+            </div>
+            <div class="card-body">
+                <InputFile OnChange="HandleFileSelected" class="form-control" accept=".csv" />
+
+                @if (isProcessing)
+                {
+                    <div class="mt-3">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <span class="ms-2">Reading CSV...</span>
+                    </div>
+                }
+
+                <div class="mt-3">
+                    <button class="btn btn-secondary" @onclick="ResetImport">Back</button>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (step == 3 && csvHeaders != null && mappableProperties != null)
+    {
+        <div class="card mt-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4>Step 3: Map CSV Columns to @selectedEntityType Fields</h4>
+                <button class="btn btn-sm btn-outline-primary" @onclick="AutoMapColumns">Auto-Map</button>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">Match your CSV columns to the database fields. Required fields are marked with *</p>
+
+                <div class="mb-3">
+                    <input type="text" class="form-control" placeholder="Search fields..." @bind="searchFilter"
+                        @bind:event="oninput" />
+                </div>
+
+                <div class="row g-3">
+                    @foreach (var property in GetFilteredProperties())
+                    {
+                        <div class="col-md-6 col-lg-4">
+                            <label class="form-label">
+                                <strong>@property.DisplayName @(property.IsRequired ? "*" : "")</strong>
+                                @if (!string.IsNullOrEmpty(property.Description))
+                                {
+                                    <br />
+
+                                    <small class="text-muted">@property.Description</small>
+                                }
+                                <br /><small class="badge bg-secondary">@GetTypeDisplayName(property.PropertyType)</small>
+                            </label>
+                            @{
+                                var currentMapping = columnMapping.GetValueOrDefault(property.PropertyName) ?? "";
+                            }
+                            <select
+                                class="form-select @(property.IsRequired && string.IsNullOrEmpty(currentMapping) ? "border-danger" : "")"
+                                value="@currentMapping"
+                                @onchange="@(e => columnMapping[property.PropertyName] = e.Value?.ToString() ?? "")">
+                                <option value="">-- Skip this field --</option>
+                                @foreach (var header in csvHeaders)
+                                {
+                                    <option value="@header">@header</option>
+                                }
+                            </select>
+                        </div>
+                    }
+                </div>
+
+                <div class="mt-4">
+                    <button class="btn btn-secondary me-2" @onclick="() => step = 2">Back</button>
+                    <button class="btn btn-primary" @onclick="ProcessImport" disabled="@isProcessing">
+                        @if (isProcessing)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                        }
+                        Import Data
+                    </button>
+                </div>
+
+                @if (GetMissingRequiredFields().Any())
+                {
+                    <div class="alert alert-warning mt-3">
+                        <strong>Missing required fields:</strong>
+                        @string.Join(", ", GetMissingRequiredFields())
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(message))
+    {
+        <div class="alert @(isError ? "alert-danger" : "alert-success") mt-3">
+            @message
+
+            @if (importErrors.Any())
+            {
+                <hr />
+                <h6>Errors (@importErrors.Count):</h6>
+                <div style="max-height: 300px; overflow-y: auto;">
+                    <ul class="mb-0">
+                        @foreach (var error in importErrors.Take(20))
+                        {
+                            <li><small>@error</small></li>
+                        }
+                        @if (importErrors.Count > 20)
+                        {
+                            <li><em>... and @(importErrors.Count - 20) more errors</em></li>
+                        }
+                    </ul>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private int step = 1;
+    private bool isProcessing = false;
+    private string message = "";
+    private bool isError = false;
+    private List<string> importErrors = new();
+    
+    private string selectedEntityType = "";
+    private IBrowserFile? selectedFile;
+    private byte[]? csvFileContent;
+    private string[]? csvHeaders;
+    private Dictionary<string, string> columnMapping = new();
+    private List<PropertyMappingInfo>? mappableProperties;
+    private string searchFilter = "";
+
+    private void LoadEntityProperties()
+    {
+        switch (selectedEntityType)
+        {
+            case "GovOrg":
+                mappableProperties = CsvImport.GetMappableProperties<GovOrg>();
+                break;
+            case "Politician":
+                mappableProperties = CsvImport.GetMappableProperties<Politician>();
+                break;
+            case "Organisation":
+                mappableProperties = CsvImport.GetMappableProperties<Organisation>();
+                break;
+            case "Donation":
+                mappableProperties = CsvImport.GetMappableProperties<Donation>();
+                break;
+        }
+
+        if (mappableProperties != null)
+        {
+            // Initialize columnMapping with empty values for all properties
+            columnMapping.Clear();
+            foreach (var prop in mappableProperties)
+            {
+                columnMapping[prop.PropertyName] = "";
+            }
+            
+            step = 2;
+        }
+    }
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        isProcessing = true;
+        message = "";
+        isError = false;
+
+        try
+        {
+            selectedFile = e.File;
+            
+            if (selectedFile.ContentType != "text/csv" && !selectedFile.Name.EndsWith(".csv"))
+            {
+                message = "Please select a CSV file";
+                isError = true;
+                return;
+            }
+
+            // Read entire file into memory immediately
+            using var stream = selectedFile.OpenReadStream(maxAllowedSize: 50 * 1024 * 1024);
+            using var memoryStream = new MemoryStream();
+            await stream.CopyToAsync(memoryStream);
+            csvFileContent = memoryStream.ToArray();
+            
+            // Read headers
+            memoryStream.Position = 0;
+            using var reader = new StreamReader(memoryStream);
+            var headerLine = await reader.ReadLineAsync();
+            
+            if (headerLine != null)
+            {
+                csvHeaders = headerLine.Split(',')
+                    .Select(h => h.Trim().Trim('"'))
+                    .ToArray();
+                
+                AutoMapColumns();
+                step = 3;
+            }
+        }
+        catch (Exception ex)
+        {
+            message = $"Error reading CSV: {ex.Message}";
+            isError = true;
+        }
+        finally
+        {
+            isProcessing = false;
+        }
+    }
+
+    private void AutoMapColumns()
+    {
+        if (csvHeaders == null || mappableProperties == null) return;
+
+        foreach (var property in mappableProperties)
+        {
+            // Try exact match first
+            var exactMatch = csvHeaders.FirstOrDefault(h => 
+                h.Equals(property.PropertyName, StringComparison.OrdinalIgnoreCase));
+            
+            if (exactMatch != null)
+            {
+                columnMapping[property.PropertyName] = exactMatch;
+                continue;
+            }
+
+            // Try display name match
+            var displayMatch = csvHeaders.FirstOrDefault(h => 
+                h.Equals(property.DisplayName, StringComparison.OrdinalIgnoreCase));
+            
+            if (displayMatch != null)
+            {
+                columnMapping[property.PropertyName] = displayMatch;
+                continue;
+            }
+
+            // Try partial matches for common patterns
+            var lowerProperty = property.PropertyName.ToLower();
+            var partialMatch = csvHeaders.FirstOrDefault(h => 
+                h.ToLower().Contains(lowerProperty) || 
+                lowerProperty.Contains(h.ToLower()));
+            
+            if (partialMatch != null)
+            {
+                columnMapping[property.PropertyName] = partialMatch;
+            }
+        }
+
+        StateHasChanged();
+    }
+
+    private async Task ProcessImport()
+    {
+        if (csvFileContent == null || mappableProperties == null) return;
+
+        var missingRequired = GetMissingRequiredFields();
+        if (missingRequired.Any())
+        {
+            message = $"Please map all required fields: {string.Join(", ", missingRequired)}";
+            isError = true;
+            return;
+        }
+
+        isProcessing = true;
+        message = "";
+        isError = false;
+        importErrors.Clear();
+
+        try
+        {
+            // Use the stored byte array instead of reading from file
+            using var stream = new MemoryStream(csvFileContent);
+            
+            var requiredFields = mappableProperties
+                .Where(p => p.IsRequired)
+                .ToDictionary(p => p.PropertyName, p => p.DisplayName);
+
+            (int successCount, List<string> errors) result = selectedEntityType switch
+            {
+                "GovOrg" => await CsvImport.ImportFromCsv<GovOrg>(stream, columnMapping, requiredFields),
+                "Politician" => await CsvImport.ImportFromCsv<Politician>(stream, columnMapping, requiredFields),
+                "Organisation" => await CsvImport.ImportFromCsv<Organisation>(stream, columnMapping, requiredFields),
+                "Donation" => await CsvImport.ImportFromCsv<Donation>(stream, columnMapping, requiredFields),
+                _ => (0, new List<string> { "Unknown entity type" })
+            };
+
+            var successCount = result.successCount;
+            var errors = result.errors;
+            importErrors = errors;
+            
+            if (successCount > 0)
+            {
+                message = $"Successfully imported {successCount} {selectedEntityType} record(s)!";
+                if (errors.Any())
+                {
+                    message += $" ({errors.Count} rows had errors and were skipped)";
+                }
+                isError = false;
+                
+                await Task.Delay(2000);
+                ResetImport();
+            }
+            else
+            {
+                message = "No records were imported. Check the errors below.";
+                isError = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            message = $"Error importing CSV: {ex.Message}";
+            isError = true;
+        }
+        finally
+        {
+            isProcessing = false;
+        }
+    }
+
+    private List<string> GetMissingRequiredFields()
+    {
+        if (mappableProperties == null) return new();
+
+        return mappableProperties
+            .Where(p => p.IsRequired && string.IsNullOrEmpty(columnMapping.GetValueOrDefault(p.PropertyName)))
+            .Select(p => p.DisplayName)
+            .ToList();
+    }
+
+    private List<PropertyMappingInfo> GetFilteredProperties()
+    {
+        if (mappableProperties == null) return new();
+
+        if (string.IsNullOrWhiteSpace(searchFilter))
+            return mappableProperties;
+
+        return mappableProperties
+            .Where(p => p.DisplayName.Contains(searchFilter, StringComparison.OrdinalIgnoreCase) ||
+                       p.PropertyName.Contains(searchFilter, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+    }
+
+    private string GetTypeDisplayName(Type type)
+    {
+        var underlyingType = Nullable.GetUnderlyingType(type) ?? type;
+
+        if (underlyingType == typeof(string)) return "Text";
+        if (underlyingType == typeof(int)) return "Number";
+        if (underlyingType == typeof(decimal)) return "Decimal";
+        if (underlyingType == typeof(DateTime)) return "Date";
+        if (underlyingType == typeof(Guid)) return "ID";
+        if (underlyingType == typeof(bool)) return "Yes/No";
+        if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
+            return "List";
+
+        return underlyingType.Name;
+    }
+
+    private void ResetImport()
+    {
+        step = 1;
+        selectedEntityType = "";
+        selectedFile = null;
+        csvFileContent = null;
+        csvHeaders = null;
+        columnMapping.Clear();
+        mappableProperties = null;
+        message = "";
+        isError = false;
+        importErrors.Clear();
+        searchFilter = "";
+    }
+}
