@@ -1,0 +1,261 @@
+@page "/politician/{Id:guid}"
+@using FollowTheMoney.Models
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<FollowTheMoneyDbContext> DbFactory
+@rendermode InteractiveServer
+
+<PageTitle>@(politician != null ? $"{politician.FirstName} {politician.LastName}" : "Loading...")</PageTitle>
+
+@if (isLoading)
+{
+    <div class="container mt-4">
+        <p>Loading...</p>
+    </div>
+}
+else if (politician != null)
+{
+    var currentPartyMembership = politician.PartyMemberships?
+        .Where(pm => pm.MembershipEndDate == null || pm.MembershipEndDate > DateTime.UtcNow)
+        .OrderByDescending(pm => pm.MembershipStartDate)
+        .FirstOrDefault();
+
+    <div class="container mt-4">
+        <div class="card">
+            <div class="card-header">
+                <h2>@($"{politician.FirstName} {politician.LastName}")</h2>
+
+                @if (currentPartyMembership?.PoliticalParty != null)
+                {
+                    <span class="badge bg-primary">@currentPartyMembership.PoliticalParty.Abbreviation</span>
+                }
+            </div>
+
+            <div class="card-body">
+
+                <!-- PERSONAL INFO -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>Personal Information</h5>
+                        <p><strong>First Name:</strong> @politician.FirstName</p>
+                        <p><strong>Last Name:</strong> @politician.LastName</p>
+                    </div>
+
+                    <!-- POLITICAL INFO -->
+                    <div class="col-md-6">
+                        <h5>Political Information</h5>
+                        @if (!string.IsNullOrEmpty(politician.ParliamentaryTitle))
+                        {
+                            <p><strong>Parliamentary Title:</strong> @politician.ParliamentaryTitle</p>
+                        }
+                        @if (!string.IsNullOrEmpty(politician.MinisterialTitle))
+                        {
+                            <p><strong>Ministerial Title:</strong> @politician.MinisterialTitle</p>
+                        }
+                        @if (politician.ElectorateRef != null)
+                        {
+                            <p><strong>Electoral Division:</strong> @politician.ElectorateRef.Name</p>
+                        }
+                        @if (!string.IsNullOrEmpty(politician.State))
+                        {
+                            <p><strong>State:</strong> @politician.State</p>
+                        }
+                    </div>
+                </div>
+
+                <!-- CURRENT PARTY MEMBERSHIP -->
+                @if (currentPartyMembership?.PoliticalParty != null)
+                {
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <h5>Current Party Affiliation</h5>
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6>
+                                        <a href="/party/@currentPartyMembership.PoliticalParty.Id" class="text-decoration-none">
+                                            @currentPartyMembership.PoliticalParty.Name (@currentPartyMembership.PoliticalParty.Abbreviation)
+                                        </a>
+                                    </h6>
+                                    <p class="mb-1"><strong>Member Since:</strong> @currentPartyMembership.MembershipStartDate.ToString("dd MMMM yyyy")</p>
+                                    @if (currentPartyMembership.MembershipEndDate != null)
+                                    {
+                                        <p class="mb-1"><strong>Membership Ended:</strong> @currentPartyMembership.MembershipEndDate.Value.ToString("dd MMMM yyyy")</p>
+                                    }
+                                    <p class="mb-0"><strong>Party Founded:</strong> @currentPartyMembership.PoliticalParty.FoundedDate.ToString("dd MMMM yyyy")</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <!-- PARTY HISTORY -->
+                @if (politician.PartyMemberships?.Count > 1)
+                {
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <h5>Party Membership History</h5>
+                            <div class="list-group">
+                                @foreach (var membership in politician.PartyMemberships.OrderByDescending(pm => pm.MembershipStartDate))
+                                {
+                                    <div class="list-group-item">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="mb-1">
+                                                    @if (membership.PoliticalParty != null)
+                                                    {
+                                                        <a href="/party/@membership.PoliticalParty.Id" class="text-decoration-none">
+                                                            @membership.PoliticalParty.Name (@membership.PoliticalParty.Abbreviation)
+                                                        </a>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span>Unknown Party</span>
+                                                    }
+                                                </h6>
+                                                <small>
+                                                    @membership.MembershipStartDate.ToString("dd MMM yyyy") 
+                                                    - 
+                                                    @(membership.MembershipEndDate?.ToString("dd MMM yyyy") ?? "Present")
+                                                </small>
+                                            </div>
+                                            @if (membership.MembershipEndDate == null || membership.MembershipEndDate > DateTime.UtcNow)
+                                            {
+                                                <span class="badge bg-success">Current</span>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <!-- Related data sections -->
+                @if (politician.Stocks?.Any() == true)
+                {
+                    <div class="mt-4">
+                        <h5>Stocks (@politician.Stocks.Count)</h5>
+                        <p class="text-muted">Stock holdings information</p>
+                    </div>
+                }
+
+                @if (politician.Assets?.Any() == true)
+                {
+                    <div class="mt-4">
+                        <h5>Assets (@politician.Assets.Count)</h5>
+                        <p class="text-muted">Asset declarations</p>
+                    </div>
+                }
+
+                @if (politician.Gifts?.Any() == true)
+                {
+                    <div class="mt-4">
+                        <h5>Gifts (@politician.Gifts.Count)</h5>
+                        <p class="text-muted">Gifts received</p>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <a href="/" class="btn btn-secondary mt-3">Back to Home</a>
+    </div>
+}
+else
+{
+    <div class="container mt-4">
+        <div class="alert alert-warning">
+            <h4>Politician Not Found</h4>
+            <p>The politician with ID @Id could not be found.</p>
+            <a href="/" class="btn btn-primary">Return to Home</a>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private Politician? politician;
+    private bool isLoading = true;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await Task.Delay(1);
+        Console.WriteLine($"ViewPage - Looking for ID: {Id}");
+
+        try
+        {
+            using var context = await DbFactory.CreateDbContextAsync();
+
+            // Load basic politician data first
+            politician = await context.Politicians
+                .FirstOrDefaultAsync(p => p.Id == Id);
+
+            if (politician != null)
+            {
+                // Safely load related data
+                try
+                {
+                    await context.Entry(politician).Reference(p => p.ElectorateRef).LoadAsync();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Could not load ElectorateRef: {ex.Message}");
+                }
+
+                try
+                {
+                    await context.Entry(politician)
+                        .Collection(p => p.PartyMemberships)
+                        .Query()
+                        .Include(pm => pm.PoliticalParty)
+                        .LoadAsync();
+                    
+                    Console.WriteLine($"Loaded {politician.PartyMemberships.Count} party memberships");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Could not load PartyMemberships: {ex.Message}");
+                }
+
+                try
+                {
+                    await context.Entry(politician).Collection(p => p.Stocks).LoadAsync();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Could not load Stocks: {ex.Message}");
+                }
+
+                try
+                {
+                    await context.Entry(politician).Collection(p => p.Assets).LoadAsync();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Could not load Assets: {ex.Message}");
+                }
+
+                try
+                {
+                    await context.Entry(politician).Collection(p => p.Gifts).LoadAsync();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Could not load Gifts: {ex.Message}");
+                }
+
+                Console.WriteLine($"ViewPage - Loaded: {politician.FirstName} {politician.LastName}");
+            }
+            else
+            {
+                Console.WriteLine($"ViewPage - No politician found with ID: {Id}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading politician: {ex.Message}");
+        }
+
+        isLoading = false;
+    }
+}

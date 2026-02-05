@@ -1,5 +1,7 @@
 ﻿@page "/"
 @using FollowTheMoney.Models
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<FollowTheMoneyDbContext> DbFactory
 @rendermode InteractiveServer
 
 <PageTitle>FTM</PageTitle>
@@ -7,37 +9,218 @@
 <h1>Welcome to FTM</h1>
 <p>Follow the Money helps you find information about politicians and their financial disclosures.</p>
 
-<SearchBar OnSearchCompleted="@HandleSearchResults" />
-
-@if (searchResults != null && searchResults.Any())
-{
-    <div class="results mt-3">
-        <h3>Search Results (@searchResults.Count):</h3>
-        <div class="list-group">
-            @foreach (var politician in searchResults)
-            {
-                <a href="/politician/@politician.Id" class="list-group-item list-group-item-action">
-                    <h5>@politician.FullName</h5>
-                    <p class="mb-1"><strong>Position:</strong> @politician.Position</p>
-                    <p class="mb-1"><strong>Electoral Division:</strong> @politician.ElectoralDivision, @politician.State</p>
-                </a>
-            }
+@*--- Search Bar ---*@
+<div class="search-container mb-3">
+    <div class="row g-3">
+        <div class="col-md-10 col-sm-9 col-8">
+            <input type="text"
+                   class="form-control"
+                   @bind="searchText"
+                   @bind:event="oninput"
+                   @bind:after="async () => await SearchAllDatabases(searchText)"
+                   placeholder="Search Data..." />
         </div>
+        
+        <div class="col-md-2 col-sm-3 col-4">
+            <button class="btn btn-secondary w-100" @onclick="ClearFilters">Clear</button>
+        </div>
+    </div>
+</div>
+
+@if (hasSearched)
+{
+    <div class="results mt-4">
+
+        @* ---------------- POLITICIANS ---------------- *@
+        @if (PoliticianResults.Any())
+        {
+            <div class="mb-4">
+                <h4>Politicians (@PoliticianResults.Count)</h4>
+                <div class="list-group">
+                    @foreach (var politician in PoliticianResults)
+                    {
+                        <a href="/politician/@politician.Id" class="list-group-item list-group-item-action">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="mb-1">@($"{politician.FirstName} {politician.LastName}")</h5>
+                                    @if (politician.PartyMemberships?.Any() == true) 
+                                    {
+                                        var currentParty = politician.PartyMemberships
+                                            .OrderByDescending(pm => pm.MembershipStartDate)
+                                            .FirstOrDefault();
+                                        <small><strong>Party:</strong> @currentParty?.PoliticalParty?.Name</small><br />
+                                    
+                                    }
+                                    <small><strong>Position:</strong> @politician.MinisterialTitle</small><br />
+                                    <small>
+                                        <strong>Electoral Division:</strong>
+                                        @politician.ElectorateRef?.Name , @politician.State
+                                    </small>
+                                </div>
+                                
+                            </div>
+                        </a>
+                    }
+                </div>
+            </div>
+        }
+
+        @* ---------------- GOV ORGS ---------------- *@
+        @if (GovOrgResults.Any())
+        {
+            <div class="mb-4">
+                <h4>Government Organisations (@GovOrgResults.Count)</h4>
+                <div class="list-group">
+                    @foreach (var org in GovOrgResults)
+                    {
+                        <a href="/organisation/@org.Id" class="list-group-item list-group-item-action">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="mb-1">@org.DeptName</h5>
+                                    @if (!string.IsNullOrEmpty(org.Abbreviation))
+                                    {
+                                        <small><strong>Abbreviation:</strong> @org.Abbreviation</small>
+                        
+                                        <br />
+                                    }
+                                    @if (!string.IsNullOrEmpty(org.PortfolioName))
+                                    {
+                                        <small><strong>Portfolio:</strong> @org.PortfolioName</small>
+                                    }
+                                </div>
+                                
+                            </div>
+                        </a>
+                    }
+                </div>
+            </div>
+        }
+
+        @* ---------------- ORGANISATIONS ---------------- *@
+        @if (OrganisationResults.Any())
+        {
+            <div class="mb-4">
+                <h4>Organisations (@OrganisationResults.Count)</h4>
+                <div class="list-group">
+                    @foreach (var org in OrganisationResults)
+                    {
+                        <a href="/organisation/@org.Id" class="list-group-item list-group-item-action">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">@org.Name</h6>
+                                    <small><strong>Industry:</strong> @org.Industry</small><br />
+                                    <small><strong>Type:</strong> @org.Type</small>
+                                </div>
+                                
+                            </div>
+                        </a>
+                    }
+                </div>
+            </div>
+        }
+
+        @* ---------------- DONATIONS ---------------- *@
+        @if (DonationResults.Any())
+        {
+            <div class="mb-4">
+                <h4>Donations (@DonationResults.Count)</h4>
+                <div class="list-group">
+                    @foreach (var donation in DonationResults)
+                    {
+                        <a href="/donation/@donation.Id" class="list-group-item list-group-item-action">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">$@donation.Value</h6>
+                                    <small><strong>Date:</strong> @donation.DonationDate.ToString("dd MMM yyyy")</small><br />
+                                    @if (donation.Organisation != null)
+                                    {
+                                        <small><strong>From:</strong> @donation.Organisation.Name</small>
+                                    }
+                                </div>
+                               
+                            </div>
+                        </a>
+                    }
+                </div>
+            </div>
+        }
+
+        @* ---------------- NO RESULTS ---------------- *@
+        @if (!PoliticianResults.Any() && !GovOrgResults.Any() && !OrganisationResults.Any() && !DonationResults.Any())
+        {
+            <div class="alert alert-info">
+                No results found. Try a different search term.
+            </div>
+        }
     </div>
 }
 else
 {
-    <p class="text-muted mt-3">No search results yet. Try searching for a politician.</p>
+    <p class="text-muted mt-3">No search results yet. Try searching for something.</p>
 }
 
 @code {
-    private List<Politician>? searchResults;
+    private ICollection<Politician> PoliticianResults { get; set; } = new List<Politician>();
+    private ICollection<GovOrg> GovOrgResults { get; set; } = new List<GovOrg>();
+    private ICollection<Organisation> OrganisationResults { get; set; } = new List<Organisation>();
+    private ICollection<Donation> DonationResults { get; set; } = new List<Donation>();
+    private bool hasSearched = false;
+    private string searchText = "";
 
-    private Task HandleSearchResults(List<Politician> results)
+    private async Task ClearFilters()
     {
-        Console.WriteLine($"Home received {results.Count} results");
-        searchResults = results;
-        StateHasChanged();
-        return Task.CompletedTask;
+        searchText = "";
+        await SearchAllDatabases(searchText);
     }
+    
+    private async Task SearchAllDatabases(string searchText)
+{
+    try
+    {
+        using var context = await DbFactory.CreateDbContextAsync();
+        
+        // Create the search pattern once
+        var pattern = $"%{searchText}%";
+
+        PoliticianResults = await context.Politicians
+            .Include(p => p.ElectorateRef)
+            .Include(p => p.PartyMemberships)
+                .ThenInclude(pm => pm.PoliticalParty)
+            .Where(p => string.IsNullOrEmpty(searchText) ||
+                EF.Functions.Like(p.FirstName, pattern) ||
+                EF.Functions.Like(p.LastName, pattern))
+            .ToListAsync();
+
+        GovOrgResults = await context.GovOrgs
+            .Where(g => string.IsNullOrEmpty(searchText) ||
+                EF.Functions.Like(g.DeptName, pattern) ||
+                (g.Abbreviation != null && EF.Functions.Like(g.Abbreviation, pattern)) ||
+                (g.PortfolioName != null && EF.Functions.Like(g.PortfolioName, pattern)))
+            .ToListAsync();
+
+        OrganisationResults = await context.Organisations
+            .Where(o => string.IsNullOrEmpty(searchText) ||
+                EF.Functions.Like(o.Name, pattern) ||
+                EF.Functions.Like(o.Industry, pattern) ||
+                EF.Functions.Like(o.Type, pattern))
+            .ToListAsync();
+
+        DonationResults = await context.Donations
+            .Include(d => d.Organisation)
+            .Where(d => string.IsNullOrEmpty(searchText) ||
+                (d.Organisation != null && EF.Functions.Like(d.Organisation.Name, pattern)))
+            .ToListAsync();
+            
+        StateHasChanged(); // Force UI update
+        hasSearched = true;
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error searching databases: {ex.Message}");
+        PoliticianResults = new List<Politician>();
+        GovOrgResults = new List<GovOrg>();
+        OrganisationResults = new List<Organisation>();
+        DonationResults = new List<Donation>();
+    }
+}
 }

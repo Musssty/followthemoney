@@ -3,6 +3,7 @@ using System;
 using FollowTheMoney.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FollowTheMoney.Migrations
 {
     [DbContext(typeof(FollowTheMoneyDbContext))]
-    partial class FollowTheMoneyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260127201413_fixpolitician")]
+    partial class fixpolitician
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.2");

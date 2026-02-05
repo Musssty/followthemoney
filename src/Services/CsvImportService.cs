@@ -360,6 +360,20 @@ public class CsvImportService
             "(\\B[A-Z])", " $1");
     }
 
+    public List<PropertyMappingInfo> GetMappableProperties(Type modelType)
+    {
+        var method = typeof(CsvImportService)
+            .GetMethod(nameof(GetMappableProperties), 1, Type.EmptyTypes);
+
+        if (method == null)
+            throw new InvalidOperationException("Generic GetMappableProperties<T>() not found.");
+
+        var generic = method.MakeGenericMethod(modelType);
+
+        return (List<PropertyMappingInfo>)generic.Invoke(this, null)!;
+    }
+
+
     private string? GetPropertyDescription(PropertyInfo property)
     {
         // Map common property names to descriptions

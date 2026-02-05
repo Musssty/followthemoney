@@ -1,17 +1,18 @@
-namespace FollowTheMoney.Models;
+namespace FollowTheMoney.Models;    
 
 public class PoliticalParty
 {
     public Guid Id { get; set; }
+    public int PartyCode { get; set; }
     public required string Name { get; set; }
     public required string Abbreviation { get; set; }
-    public DateTime Founded { get; set; }
+    public DateTime FoundedDate { get; set; }
+    public DateTime? DissolvedDate { get; set; }
+    public string? Description { get; set; }
 
     public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedDate { get; set; } = DateTime.UtcNow;
 
-    public List<Politician> Politicians { get; set; } = new();
-    public List<Donation> Donations { get; set; } = new();
-    public List<OrganisationPoliticalParty> OrganisationPoliticalParties { get; set; } = new();  // ADD THIS LINE
-
+    //Foreign key
+    public ICollection<PoliticalPartyMembership> Memberships { get; set; } = new List<PoliticalPartyMembership>();
 }

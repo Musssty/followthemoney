@@ -1,8 +1,7 @@
 @page "/organisation/{Id:guid}"
 @using FollowTheMoney.Models
-@using FollowTheMoney.Services
-@inject DummyDataService DummyData
-@inject DummyOrganisationService DummyOrganisation
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<FollowTheMoneyDbContext> DbFactory
 @rendermode InteractiveServer
 
 <h1 class="mb-4">Organisation Details</h1>
@@ -20,7 +19,8 @@ else if (organisation != null)
     <div class="card shadow-sm mb-4">
         <div class="card-body">
             <h2 class="card-title mb-4">@organisation.Name</h2>
-            
+
+            <!-- Basic Info -->
             <div class="row g-3">
                 <div class="col-md-6">
                     <div class="card border-0 bg-light p-3">
@@ -30,7 +30,7 @@ else if (organisation != null)
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="col-md-6">
                     <div class="card border-0 bg-light p-3">
                         <div class="d-flex justify-content-between align-items-center">
@@ -41,115 +41,70 @@ else if (organisation != null)
                 </div>
             </div>
 
+            <!-- Address Info -->
             <div class="row g-3 mt-4">
                 <div class="col-md-4">
                     <div class="card border-0 bg-light p-3">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="fw-semibold">Type:</span>
-                            <span class="text-muted">@organisation.Type</span>
-                        </div>
+                        <span class="fw-semibold">Type:</span>
+                        <span class="text-muted">@organisation.Type</span>
                     </div>
                 </div>
-                
+
                 <div class="col-md-4">
                     <div class="card border-0 bg-light p-3">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="fw-semibold">Address:</span>
-                            <span class="text-muted">@organisation.Address</span>
-                        </div>
+                        <span class="fw-semibold">Address:</span>
+                        <span class="text-muted">@organisation.Address</span>
                     </div>
                 </div>
-                
+
                 <div class="col-md-4">
                     <div class="card border-0 bg-light p-3">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="fw-semibold">City:</span>
-                            <span class="text-muted">@organisation.City</span>
-                        </div>
+                        <span class="fw-semibold">City:</span>
+                        <span class="text-muted">@organisation.City</span>
                     </div>
                 </div>
             </div>
 
+            <!-- More Address Info -->
             <div class="row g-3 mt-4">
                 <div class="col-md-4">
                     <div class="card border-0 bg-light p-3">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="fw-semibold">State:</span>
-                            <span class="text-muted">@organisation.State</span>
-                        </div>
+                        <span class="fw-semibold">State:</span>
+                        <span class="text-muted">@organisation.State</span>
                     </div>
                 </div>
-                
+
                 <div class="col-md-4">
                     <div class="card border-0 bg-light p-3">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="fw-semibold">Postcode:</span>
-                            <span class="text-muted">@organisation.Postcode</span>
-                        </div>
+                        <span class="fw-semibold">Postcode:</span>
+                        <span class="text-muted">@organisation.Postcode</span>
                     </div>
                 </div>
-                
+
                 <div class="col-md-4">
                     <div class="card border-0 bg-light p-3">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="fw-semibold">Website:</span>
-                            <a href="@organisation.Website" target="_blank" class="text-decoration-none text-primary">
-                                <span class="text-muted">@organisation.Website</span>
-                            </a>
-                        </div>
+                        <span class="fw-semibold">Website:</span>
+                        <a href="@organisation.Website" target="_blank" class="text-decoration-none text-primary">
+                            @organisation.Website
+                        </a>
                     </div>
                 </div>
             </div>
 
-            <div class="card border-0 bg-light p-3 mt-4">
-                <h3 class="mb-3">Politician Organisations</h3>
-                @if (organisation.PoliticianOrganisations != null && organisation.PoliticianOrganisations.Any())
-                {
-                    <ul class="list-unstyled">
-                        @foreach (var politicianOrganisation in organisation.PoliticianOrganisations)
-                        {
-                            <li class="mb-2">
-                                <span class="fw-semibold">@politicianOrganisation.Politician.FullName</span> - 
-                                <span class="text-muted">@politicianOrganisation.Organisation.Name</span>
-                            </li>
-                        }
-                    </ul>
-                }
-                else
-                {
-                    <p class="text-muted">No Politician Organisations found.</p>
-                }
-            </div>
+        
 
-            <div class="card border-0 bg-light p-3 mt-4">
-                <h3 class="mb-3">Organisation Political Parties</h3>
-                @if (organisation.OrganisationPoliticalParties != null && organisation.OrganisationPoliticalParties.Any())
-                {
-                    <ul class="list-unstyled">
-                        @foreach (var organisationPoliticalParty in organisation.OrganisationPoliticalParties)
-                        {
-                            <li class="mb-2">
-                                <span class="fw-semibold">@organisationPoliticalParty.PoliticalParty.Name</span> - 
-                                <span class="text-muted">@organisationPoliticalParty.Organisation.Name</span>
-                            </li>
-                        }
-                    </ul>
-                }
-                else
-                {
-                    <p class="text-muted">No Organisation Political Parties found.</p>
-                }
-            </div>
-
+            <!-- Donations -->
             <div class="card border-0 bg-light p-3 mt-4">
                 <h3 class="mb-3">Donations</h3>
-                @if (organisation.Donations != null && organisation.Donations.Any())
+
+                @if (organisation.Donations?.Any() == true)
                 {
                     <ul class="list-unstyled">
                         @foreach (var donation in organisation.Donations)
                         {
                             <li class="mb-2">
-                                <span class="fw-semibold">@donation.Amount</span> - 
+                                <span class="fw-semibold">@donation.Value</span>
+                                -
                                 <span class="text-muted">@donation.DonationDate.ToString("dd/MM/yyyy")</span>
                             </li>
                         }
@@ -161,22 +116,19 @@ else if (organisation != null)
                 }
             </div>
 
+            <!-- Record Info -->
             <div class="row g-3 mt-4">
                 <div class="col-md-6">
                     <div class="card border-0 bg-light p-3">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="fw-semibold">Created Date:</span>
-                            <span class="text-muted">@organisation.CreatedDate.ToString("dd/MM/yyyy")</span>
-                        </div>
+                        <span class="fw-semibold">Created Date:</span>
+                        <span class="text-muted">@organisation.CreatedDate.ToString("dd/MM/yyyy")</span>
                     </div>
                 </div>
-                
+
                 <div class="col-md-6">
                     <div class="card border-0 bg-light p-3">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="fw-semibold">Updated Date:</span>
-                            <span class="text-muted">@organisation.UpdatedDate.ToString("dd/MM/yyyy")</span>
-                        </div>
+                        <span class="fw-semibold">Updated Date:</span>
+                        <span class="text-muted">@organisation.UpdatedDate.ToString("dd/MM/yyyy")</span>
                     </div>
                 </div>
             </div>
@@ -190,28 +142,28 @@ else
     </div>
 }
 
-
 @code {
-    [Parameter]
-    public Guid Id { get; set; }
+    [Parameter] public Guid Id { get; set; }
 
     private Organisation? organisation;
     private bool isLoading = true;
 
     protected override async Task OnParametersSetAsync()
     {
-        await Task.Delay(millisecondsDelay: 1);
-        Console.WriteLine(value: $"ViewPage - Looking for ID: {Id}");
-        List<Organisation>? allOrganisations = DummyOrganisation.GetOrganisations();
-        Console.WriteLine(value: $"ViewPage - Found {allOrganisations.Count} politicians total");
+        await Task.Delay(1);
 
-        foreach (var p in allOrganisations)
+        try
         {
-            Console.WriteLine($" - {p.Name}: {p.Id}");
-        }
+            using var context = await DbFactory.CreateDbContextAsync();
 
-        organisation = allOrganisations.FirstOrDefault(p => p.Id == Id);
-        Console.WriteLine($"ViewPage - Match found: {(organisation != null ? organisation.Name : "NONE")}");
+            organisation = await context.Organisations
+                .Include(o => o.Donations)
+                .FirstOrDefaultAsync(o => o.Id == Id);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading organisation: {ex.Message}");
+        }
 
         isLoading = false;
     }

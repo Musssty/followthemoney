@@ -10,8 +10,8 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 // Register the DummyDataService
-builder.Services.AddScoped<DummyDataService>();
-builder.Services.AddScoped<DummyOrganisationService>(); 
+//builder.Services.AddScoped<DummyDataService>();
+//builder.Services.AddScoped<DummyOrganisationService>(); 
 builder.Services.AddScoped<CsvImportService>();
 
 // Add DbContext configuration

@@ -3,6 +3,7 @@ using System;
 using FollowTheMoney.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,46 +11,16 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FollowTheMoney.Migrations
 {
     [DbContext(typeof(FollowTheMoneyDbContext))]
-    partial class FollowTheMoneyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260127150117_fixmodelsagain")]
+    partial class fixmodelsagain
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.2");
 
-            modelBuilder.Entity("FollowTheMoney.Models.Asset", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("AcquiredDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("PoliticianId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("UpdatedDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<double?>("Value")
-                        .HasColumnType("REAL");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PoliticianId");
-
-                    b.ToTable("Assets");
-                });
-
-            modelBuilder.Entity("FollowTheMoney.Models.Committee", b =>
+            modelBuilder.Entity("Committee", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -94,7 +65,7 @@ namespace FollowTheMoney.Migrations
                     b.ToTable("Committees");
                 });
 
-            modelBuilder.Entity("FollowTheMoney.Models.CommitteeMembership", b =>
+            modelBuilder.Entity("CommitteeMembership", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -130,60 +101,7 @@ namespace FollowTheMoney.Migrations
                     b.ToTable("CommitteeMemberships");
                 });
 
-            modelBuilder.Entity("FollowTheMoney.Models.Donation", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("DonationDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("DonationFrom")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("DonationTo")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("DonorId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Event")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("FinancialYear")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("OrganisationId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("PoliticalPartyId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ReturnType")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("UpdatedDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<double>("Value")
-                        .HasColumnType("REAL");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DonorId");
-
-                    b.HasIndex("OrganisationId");
-
-                    b.HasIndex("PoliticalPartyId");
-
-                    b.ToTable("Donations");
-                });
-
-            modelBuilder.Entity("FollowTheMoney.Models.Donor", b =>
+            modelBuilder.Entity("Donor", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -216,7 +134,7 @@ namespace FollowTheMoney.Migrations
                     b.ToTable("Donors");
                 });
 
-            modelBuilder.Entity("FollowTheMoney.Models.Electorate", b =>
+            modelBuilder.Entity("Electorate", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -280,6 +198,91 @@ namespace FollowTheMoney.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Electorates");
+                });
+
+            modelBuilder.Entity("FollowTheMoney.Models.Asset", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("AcquiredDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("PoliticianId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<double?>("Value")
+                        .HasColumnType("REAL");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PoliticianId");
+
+                    b.ToTable("Assets");
+                });
+
+            modelBuilder.Entity("FollowTheMoney.Models.Donation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("DonationDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DonationFrom")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DonationTo")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("DonorId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Event")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("FinancialYear")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("OrganisationId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("PoliticalPartyId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ReturnType")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<double>("Value")
+                        .HasColumnType("REAL");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DonorId");
+
+                    b.HasIndex("OrganisationId");
+
+                    b.HasIndex("PoliticalPartyId");
+
+                    b.ToTable("Donations");
                 });
 
             modelBuilder.Entity("FollowTheMoney.Models.Gift", b =>
@@ -560,42 +563,6 @@ namespace FollowTheMoney.Migrations
                     b.ToTable("PoliticalParties");
                 });
 
-            modelBuilder.Entity("FollowTheMoney.Models.PoliticalPartyMembership", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime?>("MembershipEndDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("MembershipStartDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("PoliticalPartyId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("PoliticianId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("RoleInParty")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("UpdatedDate")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PoliticalPartyId");
-
-                    b.HasIndex("PoliticianId");
-
-                    b.ToTable("PoliticalPartyMemberships");
-                });
-
             modelBuilder.Entity("FollowTheMoney.Models.Politician", b =>
                 {
                     b.Property<Guid>("Id")
@@ -603,6 +570,9 @@ namespace FollowTheMoney.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Electorate")
                         .HasColumnType("TEXT");
 
                     b.Property<Guid?>("ElectorateId")
@@ -652,6 +622,12 @@ namespace FollowTheMoney.Migrations
                     b.Property<string>("Telephone")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime?>("TermEndDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("TermStartDate")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("UpdatedDate")
                         .HasColumnType("TEXT");
 
@@ -675,6 +651,21 @@ namespace FollowTheMoney.Migrations
                     b.HasIndex("DonationId");
 
                     b.ToTable("PoliticianDonations");
+                });
+
+            modelBuilder.Entity("FollowTheMoney.Models.PoliticianOrganisation", b =>
+                {
+                    b.Property<Guid>("PoliticianId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("OrganisationId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("PoliticianId", "OrganisationId");
+
+                    b.HasIndex("OrganisationId");
+
+                    b.ToTable("PoliticianOrganisations");
                 });
 
             modelBuilder.Entity("FollowTheMoney.Models.Stock", b =>
@@ -719,20 +710,45 @@ namespace FollowTheMoney.Migrations
                     b.ToTable("Stocks");
                 });
 
-            modelBuilder.Entity("FollowTheMoney.Models.Asset", b =>
+            modelBuilder.Entity("PoliticalPartyMembership", b =>
                 {
-                    b.HasOne("FollowTheMoney.Models.Politician", "Politician")
-                        .WithMany("Assets")
-                        .HasForeignKey("PoliticianId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
 
-                    b.Navigation("Politician");
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("MembershipEndDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("MembershipStartDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("PoliticalPartyId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("PoliticianId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("RoleInParty")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PoliticalPartyId");
+
+                    b.HasIndex("PoliticianId");
+
+                    b.ToTable("PoliticalPartyMemberships");
                 });
 
-            modelBuilder.Entity("FollowTheMoney.Models.CommitteeMembership", b =>
+            modelBuilder.Entity("CommitteeMembership", b =>
                 {
-                    b.HasOne("FollowTheMoney.Models.Committee", "Committee")
+                    b.HasOne("Committee", "Committee")
                         .WithMany("Memberships")
                         .HasForeignKey("CommitteeId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -749,9 +765,20 @@ namespace FollowTheMoney.Migrations
                     b.Navigation("Politician");
                 });
 
+            modelBuilder.Entity("FollowTheMoney.Models.Asset", b =>
+                {
+                    b.HasOne("FollowTheMoney.Models.Politician", "Politician")
+                        .WithMany("Assets")
+                        .HasForeignKey("PoliticianId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Politician");
+                });
+
             modelBuilder.Entity("FollowTheMoney.Models.Donation", b =>
                 {
-                    b.HasOne("FollowTheMoney.Models.Donor", "Donor")
+                    b.HasOne("Donor", "Donor")
                         .WithMany("Donations")
                         .HasForeignKey("DonorId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -815,28 +842,9 @@ namespace FollowTheMoney.Migrations
                     b.Navigation("PoliticalParty");
                 });
 
-            modelBuilder.Entity("FollowTheMoney.Models.PoliticalPartyMembership", b =>
-                {
-                    b.HasOne("FollowTheMoney.Models.PoliticalParty", "PoliticalParty")
-                        .WithMany("Memberships")
-                        .HasForeignKey("PoliticalPartyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("FollowTheMoney.Models.Politician", "Politician")
-                        .WithMany("PartyMemberships")
-                        .HasForeignKey("PoliticianId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("PoliticalParty");
-
-                    b.Navigation("Politician");
-                });
-
             modelBuilder.Entity("FollowTheMoney.Models.Politician", b =>
                 {
-                    b.HasOne("FollowTheMoney.Models.Electorate", "ElectorateRef")
+                    b.HasOne("Electorate", "ElectorateRef")
                         .WithMany("Politicians")
                         .HasForeignKey("ElectorateId")
                         .OnDelete(DeleteBehavior.SetNull);
@@ -863,6 +871,25 @@ namespace FollowTheMoney.Migrations
                     b.Navigation("Politician");
                 });
 
+            modelBuilder.Entity("FollowTheMoney.Models.PoliticianOrganisation", b =>
+                {
+                    b.HasOne("FollowTheMoney.Models.Organisation", "Organisation")
+                        .WithMany("PoliticianOrganisations")
+                        .HasForeignKey("OrganisationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FollowTheMoney.Models.Politician", "Politician")
+                        .WithMany()
+                        .HasForeignKey("PoliticianId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Organisation");
+
+                    b.Navigation("Politician");
+                });
+
             modelBuilder.Entity("FollowTheMoney.Models.Stock", b =>
                 {
                     b.HasOne("FollowTheMoney.Models.Politician", "Politician")
@@ -874,17 +901,36 @@ namespace FollowTheMoney.Migrations
                     b.Navigation("Politician");
                 });
 
-            modelBuilder.Entity("FollowTheMoney.Models.Committee", b =>
+            modelBuilder.Entity("PoliticalPartyMembership", b =>
+                {
+                    b.HasOne("FollowTheMoney.Models.PoliticalParty", "PoliticalParty")
+                        .WithMany("Memberships")
+                        .HasForeignKey("PoliticalPartyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FollowTheMoney.Models.Politician", "Politician")
+                        .WithMany("PartyMemberships")
+                        .HasForeignKey("PoliticianId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PoliticalParty");
+
+                    b.Navigation("Politician");
+                });
+
+            modelBuilder.Entity("Committee", b =>
                 {
                     b.Navigation("Memberships");
                 });
 
-            modelBuilder.Entity("FollowTheMoney.Models.Donor", b =>
+            modelBuilder.Entity("Donor", b =>
                 {
                     b.Navigation("Donations");
                 });
 
-            modelBuilder.Entity("FollowTheMoney.Models.Electorate", b =>
+            modelBuilder.Entity("Electorate", b =>
                 {
                     b.Navigation("Politicians");
                 });
@@ -894,6 +940,8 @@ namespace FollowTheMoney.Migrations
                     b.Navigation("Donations");
 
                     b.Navigation("OrganisationPoliticalParties");
+
+                    b.Navigation("PoliticianOrganisations");
                 });
 
             modelBuilder.Entity("FollowTheMoney.Models.PoliticalParty", b =>

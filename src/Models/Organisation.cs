@@ -15,7 +15,7 @@ public class Organisation
     public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedDate { get; set; } = DateTime.UtcNow;
 
-    public List<PoliticianOrganisation> PoliticianOrganisations { get; set; } = new();
+    //public List<PoliticianOrganisation> PoliticianOrganisations { get; set; } = new();
     public List<OrganisationPoliticalParty> OrganisationPoliticalParties { get; set; } = new();
     public List<Donation> Donations { get; set; } = new();
 }

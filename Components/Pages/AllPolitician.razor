@@ -1,0 +1,63 @@
+@page "/politician"
+@using FollowTheMoney.Models
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<FollowTheMoneyDbContext> DbFactory
+@rendermode InteractiveServer
+
+<PageTitle>All Politicians</PageTitle>
+
+<h1 class="mb-4">All Politicians</h1>
+
+@if (politicianResults.Any())
+{
+    <div class="mb-4">
+        <h4>Politicians (@politicianResults.Count)</h4>
+        <div class="list-group">
+            @foreach (var politician in politicianResults)
+            {
+                <a href="/politician/@politician.Id" class="list-group-item list-group-item-action">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-1">@($"{politician.FirstName} {politician.LastName}")</h5>
+                            @if (politician.PartyMemberships?.Any() == true)
+                            {
+                                var currentParty = politician.PartyMemberships
+                                .OrderByDescending(pm => pm.MembershipStartDate)
+                                .FirstOrDefault();
+                                <small><strong>Party:</strong> @currentParty?.PoliticalParty?.Name</small>
+                    
+                                <br />
+
+                            }
+                            <small><strong>Position:</strong> @politician.MinisterialTitle</small><br />
+                            <small>
+                                <strong>Electoral Division:</strong>
+                                @politician.ElectorateRef?.Name , @politician.State
+                            </small>
+                        </div>
+
+                    </div>
+                </a>
+            }
+        </div>
+    </div>
+}
+
+
+
+
+
+@code {
+    private ICollection<Politician> politicianResults = new List<Politician>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var dbContext = await DbFactory.CreateDbContextAsync();
+
+        politicianResults = await dbContext.Politicians
+        .Include(p => p.ElectorateRef)
+        .Include(p => p.PartyMemberships)
+        .ThenInclude(pm => pm.PoliticalParty)
+        .ToListAsync();
+    }
+}

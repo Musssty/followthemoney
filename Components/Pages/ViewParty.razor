@@ -1,7 +1,7 @@
 @page "/party/{Id:guid}"
 @using FollowTheMoney.Models
-@using FollowTheMoney.Services
-@inject DummyDataService DummyData
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<FollowTheMoneyDbContext> DbFactory
 @rendermode InteractiveServer
 
 <PageTitle>@(party?.Name ?? "Loading...")</PageTitle>
@@ -20,14 +20,16 @@ else if (party != null)
                 <h2>@party.Name</h2>
                 <span class="badge bg-primary">@party.Abbreviation</span>
             </div>
+
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-6">
                         <h5>Party Information</h5>
                         <p><strong>Full Name:</strong> @party.Name</p>
                         <p><strong>Abbreviation:</strong> @party.Abbreviation</p>
-                        <p><strong>Founded:</strong> @party.Founded.ToString("dd MMMM yyyy")</p>
+                        <p><strong>Founded:</strong> @party.FoundedDate.ToString("dd MMMM yyyy")</p>
                     </div>
+
                     <div class="col-md-6">
                         <h5>Record Information</h5>
                         <p><strong>Created:</strong> @party.CreatedDate.ToString("dd MMMM yyyy HH:mm")</p>
@@ -36,16 +38,24 @@ else if (party != null)
                 </div>
 
                 <div class="mt-4">
-                    <h5>Members (@party.Politicians.Count)</h5>
-                    @if (party.Politicians.Any())
+                    <h5>Members (@party.Memberships.Count)</h5>
+
+                    @if (party.Memberships.Any())
                     {
                         <div class="list-group">
-                            @foreach (var politician in party.Politicians.OrderBy(p => p.LastName))
+                            @foreach (var membership in party.Memberships
+                                .Where(m => m.Politician != null)
+                                .OrderBy(m => m.Politician!.LastName))
                             {
+                                var politician = membership.Politician!;
+
                                 <a href="/politician/@politician.Id" class="list-group-item list-group-item-action">
-                                    <h6>@politician.FullName</h6>
-                                    <p class="mb-1"><strong>Position:</strong> @politician.Position</p>
-                                    <p class="mb-0"><strong>Electoral Division:</strong> @politician.ElectoralDivision, @politician.State</p>
+                                    <h6>@($"{politician.FirstName} {politician.LastName}")</h6>
+                                    <p class="mb-1"><strong>Position:</strong> @politician.ParliamentaryTitle</p>
+                                    <p class="mb-0">
+                                        <strong>Electoral Division:</strong>
+                                        @politician.ElectorateRef?.Name, @politician.State
+                                    </p>
                                 </a>
                             }
                         </div>
@@ -58,12 +68,11 @@ else if (party != null)
 
                 <div class="mt-4">
                     <h5>Related Information</h5>
-                    <p><strong>Donations:</strong> @party.Donations.Count</p>
-                    <p><strong>Organisation Partnerships:</strong> @party.OrganisationPoliticalParties.Count</p>
+                    <p class="text-muted">No direct donation data linked to parties.</p>
                 </div>
             </div>
         </div>
-        
+
         <a href="/" class="btn btn-secondary mt-3">Back to Home</a>
     </div>
 }
@@ -81,26 +90,29 @@ else
 @code {
     [Parameter]
     public Guid Id { get; set; }
-    
+
     private PoliticalParty? party;
     private bool isLoading = true;
 
     protected override async Task OnParametersSetAsync()
     {
         await Task.Delay(1);
-        
-        // Get the party directly
-        party = DummyData.GetPoliticalParties().FirstOrDefault(p => p.Id == Id);
-        
-        // If we found the party, populate its Politicians list
-        if (party != null)
+
+        try
         {
-            var allPoliticians = DummyData.GetPoliticians();
-            party.Politicians = allPoliticians
-                .Where(p => p.PoliticalPartyId == Id)
-                .ToList();
+            using var context = await DbFactory.CreateDbContextAsync();
+
+            party = await context.PoliticalParties
+                .Include(p => p.Memberships)
+                    .ThenInclude(m => m.Politician)
+                        .ThenInclude(pol => pol.ElectorateRef)
+                .FirstOrDefaultAsync(p => p.Id == Id);
         }
-        
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading party: {ex.Message}");
+        }
+
         isLoading = false;
     }
 }

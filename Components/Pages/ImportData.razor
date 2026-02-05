@@ -2,7 +2,6 @@
 @using FollowTheMoney.Services
 @using FollowTheMoney.Models
 @using Microsoft.AspNetCore.Components.Forms
-@using static FollowTheMoney.Services.CsvImportService
 @inject CsvImportService CsvImport
 @rendermode InteractiveServer
 
@@ -22,10 +21,10 @@
                     <label class="form-label"><strong>What type of data are you importing?</strong></label>
                     <select class="form-select" @bind="selectedEntityType">
                         <option value="">-- Select Entity Type --</option>
-                        <option value="GovOrg">Government Organisations</option>
-                        <option value="Politician">Politicians</option>
-                        <option value="Organisation">Organisations</option>
-                        <option value="Donation">Donations</option>
+                        @foreach (var model in modelTypes)
+                        {
+                            <option value="@model.AssemblyQualifiedName">@model.Name</option>
+                        }
                     </select>
                 </div>
 
@@ -67,7 +66,7 @@
     {
         <div class="card mt-3">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h4>Step 3: Map CSV Columns to @selectedEntityType Fields</h4>
+                <h4>Step 3: Map CSV Columns to @selectedEntityDisplayName Fields</h4>
                 <button class="btn btn-sm btn-outline-primary" @onclick="AutoMapColumns">Auto-Map</button>
             </div>
             <div class="card-body">
@@ -75,7 +74,7 @@
 
                 <div class="mb-3">
                     <input type="text" class="form-control" placeholder="Search fields..." @bind="searchFilter"
-                        @bind:event="oninput" />
+                           @bind:event="oninput" />
                 </div>
 
                 <div class="row g-3">
@@ -87,10 +86,10 @@
                                 @if (!string.IsNullOrEmpty(property.Description))
                                 {
                                     <br />
-
                                     <small class="text-muted">@property.Description</small>
                                 }
-                                <br /><small class="badge bg-secondary">@GetTypeDisplayName(property.PropertyType)</small>
+                                <br />
+                                <small class="badge bg-secondary">@GetTypeDisplayName(property.PropertyType)</small>
                             </label>
                             @{
                                 var currentMapping = columnMapping.GetValueOrDefault(property.PropertyName) ?? "";
@@ -163,8 +162,10 @@
     private string message = "";
     private bool isError = false;
     private List<string> importErrors = new();
-    
+
+    private List<Type> modelTypes = new();
     private string selectedEntityType = "";
+    private string selectedEntityDisplayName = "";
     private IBrowserFile? selectedFile;
     private byte[]? csvFileContent;
     private string[]? csvHeaders;
@@ -172,34 +173,61 @@
     private List<PropertyMappingInfo>? mappableProperties;
     private string searchFilter = "";
 
+    protected override void OnInitialized()
+    {
+        modelTypes = GetAllModelTypes();
+    }
+
+    private List<Type> GetAllModelTypes()
+    {
+        return typeof(FollowTheMoneyDbContext).Assembly
+            .GetTypes()
+            //.Where(t => t.IsClass && !t.IsAbstract)
+            //.Where(t => t.Namespace == "FollowTheMoney.Models")
+            .Where(t => t.GetProperty("Id") != null)
+            .OrderBy(t => t.Name)
+            .ToList();
+    }
+
     private void LoadEntityProperties()
     {
-        switch (selectedEntityType)
+        if (string.IsNullOrEmpty(selectedEntityType))
+            return;
+
+        var type = Type.GetType(selectedEntityType);
+        if (type == null)
         {
-            case "GovOrg":
-                mappableProperties = CsvImport.GetMappableProperties<GovOrg>();
-                break;
-            case "Politician":
-                mappableProperties = CsvImport.GetMappableProperties<Politician>();
-                break;
-            case "Organisation":
-                mappableProperties = CsvImport.GetMappableProperties<Organisation>();
-                break;
-            case "Donation":
-                mappableProperties = CsvImport.GetMappableProperties<Donation>();
-                break;
+            message = "Could not resolve selected model type.";
+            isError = true;
+            return;
         }
 
-        if (mappableProperties != null)
+        selectedEntityDisplayName = type.Name;
+
+        try
         {
-            // Initialize columnMapping with empty values for all properties
-            columnMapping.Clear();
-            foreach (var prop in mappableProperties)
+            var method = typeof(CsvImportService)
+                .GetMethod(nameof(CsvImportService.GetMappableProperties), 1, Type.EmptyTypes);
+
+            if (method == null)
             {
-                columnMapping[prop.PropertyName] = "";
+                message = "GetMappableProperties<T>() not found on CsvImportService.";
+                isError = true;
+                return;
             }
-            
+
+            var generic = method.MakeGenericMethod(type);
+            mappableProperties = (List<PropertyMappingInfo>)generic.Invoke(CsvImport, null)!;
+
+            columnMapping = mappableProperties
+                .ToDictionary(p => p.PropertyName, p => "");
+
             step = 2;
+        }
+        catch (Exception ex)
+        {
+            message = $"Error loading entity properties: {ex.Message}";
+            isError = true;
         }
     }
 
@@ -212,33 +240,36 @@
         try
         {
             selectedFile = e.File;
-            
-            if (selectedFile.ContentType != "text/csv" && !selectedFile.Name.EndsWith(".csv"))
+
+            if (selectedFile.ContentType != "text/csv" && !selectedFile.Name.EndsWith(".csv", StringComparison.OrdinalIgnoreCase))
             {
                 message = "Please select a CSV file";
                 isError = true;
                 return;
             }
 
-            // Read entire file into memory immediately
             using var stream = selectedFile.OpenReadStream(maxAllowedSize: 50 * 1024 * 1024);
             using var memoryStream = new MemoryStream();
             await stream.CopyToAsync(memoryStream);
             csvFileContent = memoryStream.ToArray();
-            
-            // Read headers
+
             memoryStream.Position = 0;
             using var reader = new StreamReader(memoryStream);
             var headerLine = await reader.ReadLineAsync();
-            
+
             if (headerLine != null)
             {
                 csvHeaders = headerLine.Split(',')
                     .Select(h => h.Trim().Trim('"'))
                     .ToArray();
-                
+
                 AutoMapColumns();
                 step = 3;
+            }
+            else
+            {
+                message = "CSV file appears to be empty.";
+                isError = true;
             }
         }
         catch (Exception ex)
@@ -258,32 +289,29 @@
 
         foreach (var property in mappableProperties)
         {
-            // Try exact match first
-            var exactMatch = csvHeaders.FirstOrDefault(h => 
+            var exactMatch = csvHeaders.FirstOrDefault(h =>
                 h.Equals(property.PropertyName, StringComparison.OrdinalIgnoreCase));
-            
+
             if (exactMatch != null)
             {
                 columnMapping[property.PropertyName] = exactMatch;
                 continue;
             }
 
-            // Try display name match
-            var displayMatch = csvHeaders.FirstOrDefault(h => 
+            var displayMatch = csvHeaders.FirstOrDefault(h =>
                 h.Equals(property.DisplayName, StringComparison.OrdinalIgnoreCase));
-            
+
             if (displayMatch != null)
             {
                 columnMapping[property.PropertyName] = displayMatch;
                 continue;
             }
 
-            // Try partial matches for common patterns
             var lowerProperty = property.PropertyName.ToLower();
-            var partialMatch = csvHeaders.FirstOrDefault(h => 
-                h.ToLower().Contains(lowerProperty) || 
+            var partialMatch = csvHeaders.FirstOrDefault(h =>
+                h.ToLower().Contains(lowerProperty) ||
                 lowerProperty.Contains(h.ToLower()));
-            
+
             if (partialMatch != null)
             {
                 columnMapping[property.PropertyName] = partialMatch;
@@ -295,7 +323,8 @@
 
     private async Task ProcessImport()
     {
-        if (csvFileContent == null || mappableProperties == null) return;
+        if (csvFileContent == null || mappableProperties == null || string.IsNullOrEmpty(selectedEntityType))
+            return;
 
         var missingRequired = GetMissingRequiredFields();
         if (missingRequired.Any())
@@ -312,35 +341,51 @@
 
         try
         {
-            // Use the stored byte array instead of reading from file
             using var stream = new MemoryStream(csvFileContent);
-            
+
             var requiredFields = mappableProperties
                 .Where(p => p.IsRequired)
                 .ToDictionary(p => p.PropertyName, p => p.DisplayName);
 
-            (int successCount, List<string> errors) result = selectedEntityType switch
+            var type = Type.GetType(selectedEntityType);
+            if (type == null)
             {
-                "GovOrg" => await CsvImport.ImportFromCsv<GovOrg>(stream, columnMapping, requiredFields),
-                "Politician" => await CsvImport.ImportFromCsv<Politician>(stream, columnMapping, requiredFields),
-                "Organisation" => await CsvImport.ImportFromCsv<Organisation>(stream, columnMapping, requiredFields),
-                "Donation" => await CsvImport.ImportFromCsv<Donation>(stream, columnMapping, requiredFields),
-                _ => (0, new List<string> { "Unknown entity type" })
-            };
+                message = "Could not resolve selected model type.";
+                isError = true;
+                return;
+            }
 
-            var successCount = result.successCount;
+            var method = typeof(CsvImportService)
+                .GetMethod(nameof(CsvImportService.ImportFromCsv), 1,
+                    new[] { typeof(Stream), typeof(Dictionary<string, string>), typeof(Dictionary<string, string>) });
+
+            if (method == null)
+            {
+                message = "ImportFromCsv<T>() not found on CsvImportService.";
+                isError = true;
+                return;
+            }
+
+            var generic = method.MakeGenericMethod(type);
+            var task = (Task)generic.Invoke(CsvImport, new object[] { stream, columnMapping, requiredFields })!;
+            await task;
+
+            var resultProperty = task.GetType().GetProperty("Result");
+            var result = ((int successCount, List<string> errors))resultProperty!.GetValue(task)!;
+
+            var success = result.successCount;
             var errors = result.errors;
             importErrors = errors;
-            
-            if (successCount > 0)
+
+            if (success > 0)
             {
-                message = $"Successfully imported {successCount} {selectedEntityType} record(s)!";
+                message = $"Successfully imported {success} {selectedEntityDisplayName} record(s)!";
                 if (errors.Any())
                 {
                     message += $" ({errors.Count} rows had errors and were skipped)";
                 }
                 isError = false;
-                
+
                 await Task.Delay(2000);
                 ResetImport();
             }
@@ -380,7 +425,7 @@
 
         return mappableProperties
             .Where(p => p.DisplayName.Contains(searchFilter, StringComparison.OrdinalIgnoreCase) ||
-                       p.PropertyName.Contains(searchFilter, StringComparison.OrdinalIgnoreCase))
+                        p.PropertyName.Contains(searchFilter, StringComparison.OrdinalIgnoreCase))
             .ToList();
     }
 
@@ -404,6 +449,7 @@
     {
         step = 1;
         selectedEntityType = "";
+        selectedEntityDisplayName = "";
         selectedFile = null;
         csvFileContent = null;
         csvHeaders = null;

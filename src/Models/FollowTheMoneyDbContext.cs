@@ -13,97 +13,84 @@ public class FollowTheMoneyDbContext : DbContext
     // Main Entities
     public DbSet<Politician> Politicians { get; set; }
     public DbSet<PoliticalParty> PoliticalParties { get; set; }
+    public DbSet<Electorate> Electorates { get; set; }
+    public DbSet<Committee> Committees { get; set; }
+    public DbSet<CommitteeMembership> CommitteeMemberships { get; set; }
+    public DbSet<PoliticalPartyMembership> PoliticalPartyMemberships { get; set; }
+
+    // Other domain entities
     public DbSet<Organisation> Organisations { get; set; }
     public DbSet<Donation> Donations { get; set; }
     public DbSet<Stock> Stocks { get; set; }
     public DbSet<Asset> Assets { get; set; }
     public DbSet<Gift> Gifts { get; set; }
     public DbSet<GovOrg> GovOrgs { get; set; }
+    public DbSet<Donor> Donors { get; set; }
 
-    // Join Entities
-    public DbSet<PoliticianOrganisation> PoliticianOrganisations { get; set; }
+    // Join Entities (if still used)
+    //public DbSet<PoliticianOrganisation> PoliticianOrganisations { get; set; }
     public DbSet<OrganisationPoliticalParty> OrganisationPoliticalParties { get; set; }
     public DbSet<PoliticianDonation> PoliticianDonations { get; set; }
-    
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-        // Politician ↔ Organisation
-        modelBuilder.Entity<PoliticianOrganisation>()
-            .HasKey(po => new { po.PoliticianId, po.OrganisationId });
+       
 
-        modelBuilder.Entity<PoliticianOrganisation>()
-            .HasOne(po => po.Politician)
-            .WithMany(p => p.PoliticianOrganisations)
-            .HasForeignKey(po => po.PoliticianId);
-
-        modelBuilder.Entity<PoliticianOrganisation>()
-            .HasOne(po => po.Organisation)
-            .WithMany(o => o.PoliticianOrganisations)
-            .HasForeignKey(po => po.OrganisationId);
-
-        // Organisation ↔ PoliticalParty
+        // -----------------------------
+        // Many-to-many: Organisation ↔ PoliticalParty
+        // -----------------------------
         modelBuilder.Entity<OrganisationPoliticalParty>()
             .HasKey(op => new { op.OrganisationId, op.PoliticalPartyId });
 
-        modelBuilder.Entity<OrganisationPoliticalParty>()
-            .HasOne(op => op.Organisation)
-            .WithMany(o => o.OrganisationPoliticalParties)
-            .HasForeignKey(op => op.OrganisationId);
-
-        modelBuilder.Entity<OrganisationPoliticalParty>()
-            .HasOne(op => op.PoliticalParty)
-            .WithMany(pp => pp.OrganisationPoliticalParties)
-            .HasForeignKey(op => op.PoliticalPartyId);
-
-        // Politician ↔ Donation
+        // -----------------------------
+        // Many-to-many: Politician ↔ Donation
+        // -----------------------------
         modelBuilder.Entity<PoliticianDonation>()
             .HasKey(pd => new { pd.PoliticianId, pd.DonationId });
 
-        modelBuilder.Entity<PoliticianDonation>()
-            .HasOne(pd => pd.Politician)
-            .WithMany(p => p.PoliticianDonations)
-            .HasForeignKey(pd => pd.PoliticianId);
+        // -----------------------------
+        // One-to-many: Donor → Donations
+        // -----------------------------
+        modelBuilder.Entity<Donor>()
+            .HasMany(d => d.Donations)
+            .WithOne(don => don.Donor)
+            .HasForeignKey(don => don.DonorId);
 
-        modelBuilder.Entity<PoliticianDonation>()
-            .HasOne(pd => pd.Donation)
-            .WithMany(d => d.PoliticianDonations)
-            .HasForeignKey(pd => pd.DonationId);
+        // -----------------------------
+        // One-to-many: Electorate → Politicians
+        // -----------------------------
+        modelBuilder.Entity<Electorate>()
+            .HasMany(e => e.Politicians)
+            .WithOne(p => p.ElectorateRef)
+            .HasForeignKey(p => p.ElectorateId)
+            .OnDelete(DeleteBehavior.SetNull);
 
-        // Politician → PoliticalParty
-        modelBuilder.Entity<Politician>()
-            .HasOne(p => p.PoliticalParty)
-            .WithMany(pp => pp.Politicians)
-            .HasForeignKey(p => p.PoliticalPartyId);
+        // -----------------------------
+        // Many-to-many (via join): Politician ↔ PoliticalParty
+        // -----------------------------
+        modelBuilder.Entity<PoliticalPartyMembership>()
+            .HasOne(ppm => ppm.Politician)
+            .WithMany(p => p.PartyMemberships)
+            .HasForeignKey(ppm => ppm.PoliticianId);
 
-        // Donation → Organisation & Party
-        modelBuilder.Entity<Donation>()
-            .HasOne(d => d.Organisation)
-            .WithMany(o => o.Donations)
-            .HasForeignKey(d => d.OrganisationId);
+        modelBuilder.Entity<PoliticalPartyMembership>()
+            .HasOne(ppm => ppm.PoliticalParty)
+            .WithMany(pp => pp.Memberships)
+            .HasForeignKey(ppm => ppm.PoliticalPartyId);
 
-        modelBuilder.Entity<Donation>()
-            .HasOne(d => d.PoliticalParty)
-            .WithMany(pp => pp.Donations)
-            .HasForeignKey(d => d.PoliticalPartyId);
+        // -----------------------------
+        // Many-to-many (via join): Politician ↔ Committee
+        // -----------------------------
+        modelBuilder.Entity<CommitteeMembership>()
+            .HasOne(cm => cm.Politician)
+            .WithMany(p => p.CommitteeMemberships)
+            .HasForeignKey(cm => cm.PoliticianId);
 
-        // Stock → Politician
-        modelBuilder.Entity<Stock>()
-            .HasOne(s => s.Politician)
-            .WithMany(p => p.Stocks)
-            .HasForeignKey(s => s.PoliticianId);
-
-        // Asset → Politician
-        modelBuilder.Entity<Asset>()
-            .HasOne(a => a.Politician)
-            .WithMany(p => p.Assets)
-            .HasForeignKey(a => a.PoliticianId);
-
-        // Gift → Politician
-        modelBuilder.Entity<Gift>()
-            .HasOne(g => g.Politician)
-            .WithMany(p => p.Gifts)
-            .HasForeignKey(g => g.PoliticianId);
+        modelBuilder.Entity<CommitteeMembership>()
+            .HasOne(cm => cm.Committee)
+            .WithMany(c => c.Memberships)
+            .HasForeignKey(cm => cm.CommitteeId);
     }
 }
