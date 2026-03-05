@@ -8,10 +8,11 @@ public class Politician
     public string? Salutation { get; set; }
     public string? PostNominals { get; set; }
     public required string FirstName { get; set; }
-    public required string LastName { get; set; }
+    public required string Surname { get; set; }
     public string? OtherName { get; set; }
     public string? PreferredName { get; set; }
     public string? Initials { get; set; }
+    public string? Electorate {get; set; }
     public string? State { get; set; }
     public string? PoliticalParty { get; set; }
     public string? Gender { get; set; }

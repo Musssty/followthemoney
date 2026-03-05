@@ -45,12 +45,12 @@ else if (party != null)
                         <div class="list-group">
                             @foreach (var membership in party.Memberships
                                 .Where(m => m.Politician != null)
-                                .OrderBy(m => m.Politician!.LastName))
+                                .OrderBy(m => m.Politician!.Surname))
                             {
                                 var politician = membership.Politician!;
 
                                 <a href="/politician/@politician.Id" class="list-group-item list-group-item-action">
-                                    <h6>@($"{politician.FirstName} {politician.LastName}")</h6>
+                                    <h6>@($"{politician.FirstName} {politician.Surname}")</h6>
                                     <p class="mb-1"><strong>Position:</strong> @politician.ParliamentaryTitle</p>
                                     <p class="mb-0">
                                         <strong>Electoral Division:</strong>

@@ -42,7 +42,7 @@
                         <a href="/politician/@politician.Id" class="list-group-item list-group-item-action">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
-                                    <h5 class="mb-1">@($"{politician.FirstName} {politician.LastName}")</h5>
+                                    <h5 class="mb-1">@($"{politician.FirstName} {politician.Surname}")</h5>
                                     @if (politician.PartyMemberships?.Any() == true) 
                                     {
                                         var currentParty = politician.PartyMemberships
@@ -188,7 +188,7 @@ else
                 .ThenInclude(pm => pm.PoliticalParty)
             .Where(p => string.IsNullOrEmpty(searchText) ||
                 EF.Functions.Like(p.FirstName, pattern) ||
-                EF.Functions.Like(p.LastName, pattern))
+                EF.Functions.Like(p.Surname, pattern))
             .ToListAsync();
 
         GovOrgResults = await context.GovOrgs

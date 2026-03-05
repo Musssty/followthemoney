@@ -367,7 +367,7 @@ namespace FollowTheMoney.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("LastName")
+                    b.Property<string>("Surname")
                         .IsRequired()
                         .HasColumnType("TEXT");
 

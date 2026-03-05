@@ -4,7 +4,7 @@
 @inject IDbContextFactory<FollowTheMoneyDbContext> DbFactory
 @rendermode InteractiveServer
 
-<PageTitle>@(politician != null ? $"{politician.FirstName} {politician.LastName}" : "Loading...")</PageTitle>
+<PageTitle>@(politician != null ? $"{politician.FirstName} {politician.Surname}" : "Loading...")</PageTitle>
 
 @if (isLoading)
 {
@@ -22,7 +22,7 @@ else if (politician != null)
     <div class="container mt-4">
         <div class="card">
             <div class="card-header">
-                <h2>@($"{politician.FirstName} {politician.LastName}")</h2>
+                <h2>@($"{politician.FirstName} {politician.Surname}")</h2>
 
                 @if (currentPartyMembership?.PoliticalParty != null)
                 {
@@ -37,7 +37,7 @@ else if (politician != null)
                     <div class="col-md-6">
                         <h5>Personal Information</h5>
                         <p><strong>First Name:</strong> @politician.FirstName</p>
-                        <p><strong>Last Name:</strong> @politician.LastName</p>
+                        <p><strong>Last Name:</strong> @politician.Surname</p>
                     </div>
 
                     <!-- POLITICAL INFO -->
@@ -244,7 +244,7 @@ else
                     Console.WriteLine($"Could not load Gifts: {ex.Message}");
                 }
 
-                Console.WriteLine($"ViewPage - Loaded: {politician.FirstName} {politician.LastName}");
+                Console.WriteLine($"ViewPage - Loaded: {politician.FirstName} {politician.Surname}");
             }
             else
             {
